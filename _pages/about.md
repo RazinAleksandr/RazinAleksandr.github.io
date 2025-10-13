@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Research Engineer specializing in Robotics, Computer Vision, and Machine Learning
+subtitle: AI Researcher, MS's Big Data and Machine Learning, ITMO University<br><br>📍 Tbilisi, Georgia
 
 profile:
   align: right
