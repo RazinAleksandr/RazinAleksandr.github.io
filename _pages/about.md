@@ -1,8 +1,8 @@
 ---
 layout: about
-title: about
+title: About
 permalink: /
-subtitle: AI Researcher, MS's Big Data and Machine Learning, ITMO University<br><br>📍 Tbilisi, Georgia
+subtitle: AI Researcher, MS's Big Data and Machine Learning, ITMO University<br><br><strong>📍 Tbilisi, Georgia</strong>
 
 profile:
   align: right
