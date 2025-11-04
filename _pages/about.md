@@ -26,12 +26,10 @@ latest_posts:
 
 Hey! 👋
 
-I am Aleksandr Razin, an MSc graduate in Machine Learning from ITMO University, currently seeking a PhD focused on generative methods for visual synthesis and understanding, controllable AI, and deep metric and representation learning.
+I’m Aleksandr Razin, an MSc graduate in Machine Learning from ITMO University. My research sits at the intersection of image restoration, generative computer vision, and multimodal learning. I’m broadly interested in controllable, personalized generative systems that combine structural understanding with creative synthesis under low latency, and I enjoy turning theoretical advances into practical, reliable tools.
 
-Broadly, I am interested in generative AI, computer vision, and making AI systems more controllable and efficient. I enjoy bridging the gap between theoretical advances and real-world applications.
+Along the way, I’ve worked on pipeline-inspection robotics (patented) and advanced industrial computer vision at Huawei, where I focused on efficient image restoration—super-resolution, denoising, and demosaicing for both images and video—as well as diffusion models for image generation. My MSc thesis studied spatial conditioning in generative models, with a depth-conditioned approach to super-resolution that reduced artifacts and improved fidelity in low-level vision tasks.
 
-During my research journey, I've worked on pipeline inspection robotics (patented), improved industrial computer vision at Huawei, and developed depth-conditioned diffusion models for super-resolution. My thesis focused on enhancing generative models with spatial conditioning to reduce artifacts and improve quality.
+Currently, I’m turning image restoration methods into generative modeling to improve personalization and efficiency. I’m seeking a PhD supervisor/professor and open to challenging, impactful research opportunities.
 
-Lately, I have been focusing on: (1) Few-shot personalization in generative models, (2) Quality-efficiency trade-offs in diffusion models, and (3) Self-improving data ecosystems for robust AI systems.
-
-You can find my [CV](/cv/) here. I am always open to collaboration — feel free to reach out via email!
+You can find my [CV](/cv/) here. I’m always open to collaboration, feel free to reach out by email!
