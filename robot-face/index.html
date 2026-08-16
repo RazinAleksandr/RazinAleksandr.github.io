@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Robot Face — лицо под управлением мультиагентной LLM</title>
+    <meta
+      name="description"
+      content="Каждая мимическая мышца — отдельный инструмент, который вызывает LLM. Мультиагентная система оценивает сообщение и иннервирует лицо мышца за мышцей."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🙂</text></svg>"
+    />
+    <!-- three.js is vendored, not fetched from a CDN: this page must keep working
+     offline, behind a strict CSP, and after any CDN outage. -->
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three/three.module.min.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot" id="statusDot"></span>
+        <h1>Robot&nbsp;Face</h1>
+        <span class="sub">мультиагентная LLM управляет мимикой мышца&nbsp;за&nbsp;мышцей</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge" id="modeBadge">офлайн-режим</span>
+        <button class="ghost" id="tabSettingsBtn" title="Настройки">⚙</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="stage">
+        <canvas id="face2d"></canvas>
+        <canvas id="face3d" hidden></canvas>
+
+        <div class="stage-overlay">
+          <div class="renderer-switch" role="tablist">
+            <button class="on" data-renderer="2d">Процедурное лицо</button>
+            <button data-renderer="3d">3D-аватар</button>
+          </div>
+          <div class="hud" id="hud"></div>
+        </div>
+
+        <div class="stage-foot">
+          <div class="presets" id="presets"></div>
+          <div class="stage-meta">
+            <span id="fpsLabel">—</span>
+            <button class="ghost" id="relaxBtn" title="Расслабить все мышцы">расслабить</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <nav class="tabs">
+          <button class="on" data-tab="chat">Диалог</button>
+          <button data-tab="muscles">Мышцы</button>
+          <button data-tab="trace">Агенты</button>
+          <button data-tab="settings">Настройки</button>
+        </nav>
+
+        <!-- ── Диалог ── -->
+        <div class="tabpane on" data-pane="chat">
+          <div class="chat" id="chat"></div>
+          <form class="composer" id="composer">
+            <textarea id="input" rows="2" placeholder="Скажите ей что-нибудь…" autocomplete="off"></textarea>
+            <button type="submit" id="sendBtn">→</button>
+          </form>
+          <div class="hint">Enter — отправить, Shift+Enter — перенос строки</div>
+        </div>
+
+        <!-- ── Мышцы ── -->
+        <div class="tabpane" data-pane="muscles">
+          <div class="pane-head">
+            <p>Каждая строка — отдельный инструмент, доступный модели. Ползунок иннервирует мышцу напрямую, минуя агентов.</p>
+            <label class="check"><input type="checkbox" id="onlyActive" /> только активные</label>
+          </div>
+          <div class="muscles" id="muscles"></div>
+        </div>
+
+        <!-- ── Агенты ── -->
+        <div class="tabpane" data-pane="trace">
+          <div class="pane-head">
+            <p>Конвейер: оценка → (моторика ∥ речь) → критик → правка.</p>
+            <div class="metrics" id="metrics"></div>
+          </div>
+          <div class="trace" id="trace"></div>
+          <div class="pane-foot">
+            <button class="ghost" id="exportBtn">выгрузить сессию (JSON)</button>
+            <button class="ghost" id="clearBtn">очистить</button>
+          </div>
+        </div>
+
+        <!-- ── Настройки ── -->
+        <div class="tabpane" data-pane="settings">
+          <div class="settings">
+            <label class="field">
+              <span>Anthropic API key</span>
+              <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" />
+              <small
+                >Хранится только в localStorage этого браузера и уходит напрямую в api.anthropic.com. Ключ нигде больше не появляется. Если так не
+                подходит — укажите свой прокси ниже.</small
+              >
+            </label>
+
+            <label class="field">
+              <span>Прокси (необязательно)</span>
+              <input type="text" id="proxyUrl" placeholder="https://my-proxy.example.com" autocomplete="off" />
+              <small>Если задан, запросы идут на <code>{прокси}/v1/messages</code> без ключа в браузере.</small>
+            </label>
+
+            <label class="field">
+              <span>Модель — оценка, критик, речь</span>
+              <select id="model">
+                <option value="claude-opus-5">claude-opus-5</option>
+                <option value="claude-sonnet-5">claude-sonnet-5</option>
+                <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Модель — моторная кора</span>
+              <select id="motorModel">
+                <option value="claude-opus-5">claude-opus-5</option>
+                <option value="claude-sonnet-5">claude-sonnet-5</option>
+                <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+              </select>
+              <small>Именно эта модель вызывает мышечные инструменты. Понижение уровня хорошо видно на лице.</small>
+            </label>
+
+            <label class="field">
+              <span>Effort</span>
+              <select id="effort">
+                <option value="low">low — быстро</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+                <option value="xhigh">xhigh — медленно и тщательно</option>
+              </select>
+            </label>
+
+            <label class="check"><input type="checkbox" id="useCritic" checked /> критик проверяет и правит выражение</label>
+            <label class="check"><input type="checkbox" id="useVoice" checked /> генерировать реплику</label>
+            <label class="check"><input type="checkbox" id="useSpeech" /> произносить вслух (Web Speech API)</label>
+            <label class="check"><input type="checkbox" id="showLeaks" checked /> отмечать микровыражения в трейсе</label>
+
+            <label class="field">
+              <span>Мягкое свечение (bloom)</span>
+              <select id="bloomMode">
+                <option value="auto">автоматически по производительности</option>
+                <option value="on">всегда включено</option>
+                <option value="off">выключено</option>
+              </select>
+              <small>Смягчает векторные края до фотографического вида. Требует чтения кадра обратно из канваса — на слабых машинах это дорого.</small>
+            </label>
+
+            <hr />
+
+            <label class="field">
+              <span>3D-аватар: GLB с ARKit-блендшейпами</span>
+              <input type="text" id="avatarUrl" placeholder="https://models.readyplayer.me/…glb?morphTargets=ARKit" autocomplete="off" />
+              <div class="row">
+                <button class="ghost" id="loadAvatarBtn">загрузить по ссылке</button>
+                <label class="ghost file">открыть файл<input type="file" id="avatarFile" accept=".glb,.gltf" hidden /></label>
+              </div>
+              <small
+                >Нужен фотореализм — подставьте сюда свой сканированный или Ready&nbsp;Player&nbsp;Me аватар. Модель должна экспортироваться с
+                ARKit-блендшейпами; мышцы отображаются в них автоматически.</small
+              >
+            </label>
+
+            <div class="note" id="avatarNote"></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
