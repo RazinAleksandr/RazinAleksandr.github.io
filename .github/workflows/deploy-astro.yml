@@ -2,7 +2,7 @@ name: Deploy site
 
 on:
   push:
-    branches: [main, astro-site]
+    branches: [main, astro-site, "claude/**"]
   workflow_dispatch:
 
 # the publish action commits the built site to the gh-pages branch
