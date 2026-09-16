@@ -34,7 +34,7 @@ All of it is data, not markup — edit these and the page follows:
 
 | File | What it drives |
 | --- | --- |
-| `src/data/profile.ts` | name, role, headline, intro, current directions, links, CV file |
+| `src/data/profile.ts` | name, role, the two-paragraph bio, links, CV file |
 | `src/data/news.ts` | the dated `YYYY.MM` news list |
 | `src/data/logos.ts` | the running "Previously" strip: organisations with `YYYY.MM` dates, oldest first |
 | `src/data/publications.ts` | papers, thumbnails, links; `bibtex` is required on every entry |

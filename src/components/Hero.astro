@@ -24,11 +24,9 @@ const portrait = `${base}portrait-900.jpg`.replace(/\/{2,}/g, "/");
 
   <div class="text">
     <p class="label role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a>, {profile.location}</p>
-    <p class="serif head">{profile.headline[0]}<br /><em>{profile.headline[1]}</em></p>
-    <p class="intro" set:html={inlineMd(profile.intro)} />
-    <ul class="working">
-      {profile.working.map((w) => <li>{w}</li>)}
-    </ul>
+    <div class="intro">
+      {profile.intro.map((para) => <p set:html={inlineMd(para)} />)}
+    </div>
     <ul class="contacts label">
       <li><a href={`mailto:${profile.email}`}><Icon name="mail" /> Email</a></li>
       <li><a href={profile.links.scholar} target="_blank" rel="noopener"><Icon name="scholar" size={13} /> Scholar</a></li>
@@ -62,18 +60,13 @@ const portrait = `${base}portrait-900.jpg`.replace(/\/{2,}/g, "/");
   .frame { grid-area: frame; width: 100%; }
 
   .text { grid-area: text; max-width: 540px; }
-  .role { margin-bottom: 18px; }
+  .role { margin-bottom: 20px; }
   .role a { color: var(--ink); }
   .role a:hover { color: var(--accent); }
-  .head { font-size: clamp(28px, 3.3vw, 40px); line-height: 1.08; margin-bottom: 20px; }
-  .head em { font-style: italic; }
-  .intro { font-size: 16.5px; line-height: 1.6; color: var(--ink-2); max-width: 52ch; }
+  .intro { display: grid; gap: 14px; font-size: 17px; line-height: 1.6; color: var(--ink-2); max-width: 54ch; }
+  .intro :global(strong) { color: var(--ink); font-weight: 500; }
   .intro :global(a) { color: var(--ink); border-bottom: 1px solid var(--line-2); }
   .intro :global(a:hover) { color: var(--accent); border-color: var(--accent); }
-
-  .working { margin-top: 20px; display: grid; gap: 5px; font-size: 14.5px; color: var(--ink); }
-  .working li { display: flex; gap: 12px; align-items: baseline; }
-  .working li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; transform: translateY(-1px); }
 
   .contacts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; }
   .contacts a { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); transition: color .15s; }
