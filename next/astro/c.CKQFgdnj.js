@@ -12,16 +12,13 @@ const profile = {
   orgHref: "https://insait.ai/",
   location: "Sofia",
   email: "razin.x.aleks@gmail.com",
-  /** The big line. */
-  headline: ["Visual agents that remember,", "predict and act."],
-  /** A few sentences under it. Inline markdown links allowed. No metrics. */
-  intro: "Research Scientist at [INSAIT](https://insait.ai/) with [Jinjin Gu](https://insait.ai/dr-jinjin-gu/), and an ELLIS PhD student. I work on long-horizon embodied tasks: a generative world model predicts what an action will do, a persistent 3D state of the scene keeps track of what is actually there, and a vision-language-action policy does the low-level control. Before this I worked on diffusion models and image restoration, most recently the Latent Upscaling Adapter.",
-  /** Current directions, shown as a short list under the intro. */
-  working: [
-    "Generative world models for embodied agents",
-    "Persistent 3D scene state for planning and recovery",
-    "Vision-language-action policies",
-    "Efficient diffusion: latent upscaling, restoration"
+  /**
+   * The bio: who, where now and on what (bold), where before, degree.
+   * Two short paragraphs, inline markdown, no numbers.
+   */
+  intro: [
+    "I'm Aleksandr Razin, a Research Scientist at [INSAIT](https://insait.ai/) working with [Jinjin Gu](https://insait.ai/dr-jinjin-gu/), and an ELLIS PhD student. My research focuses on **embodied visual agents — generative world models, persistent 3D scene state and vision-language-action policies for long-horizon tasks** — and on **efficient diffusion models** for high-resolution generation and restoration.",
+    "Previously I worked on video restoration and diffusion at Huawei, founded a computer-vision startup, and built the agentic copilot at TradingView. I hold an M.Sc. in Machine Learning from ITMO University."
   ],
   tagline: "Visual agents, generative world models and image restoration.",
   links: {
