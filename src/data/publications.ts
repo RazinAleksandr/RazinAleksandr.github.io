@@ -65,7 +65,7 @@ export const publications: Publication[] = [
     year: "2024",
     abstract:
       "Fine-tuning pretrained language models on structured, diverse online forum data to improve question answering in the programming domain.",
-    image: "pubs/qa-model.jpg",
+    image: "pubs/qa-model.png",
     links: [],
   },
   {
@@ -83,7 +83,7 @@ export const publications: Publication[] = [
     note: "MDPI 7(6), 75",
     abstract:
       "A crawling robot for surveying pipelines and metal structures of complex spatial configuration at oil and gas facilities, with on-device perception replacing manual inspection.",
-    image: "pubs/robot-crawler.jpg",
+    image: "pubs/robot-crawler.png",
     links: [
       { label: "DOI", href: "https://doi.org/10.3390/infrastructures7060075" },
       { label: "MDPI", href: "https://www.mdpi.com/2412-3811/7/6/75" },

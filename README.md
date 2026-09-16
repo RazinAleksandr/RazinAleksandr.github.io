@@ -24,7 +24,7 @@ Node 22+. No other setup.
 
 | Route | What it is |
 | --- | --- |
-| `/` | Name, statement, where I've worked (logos), papers, projects, news |
+| `/` | Name, statement, where I've worked (logos), news, papers, projects |
 | `/cv` | The CV as a PDF, embedded, with a download button |
 | `/blog` | Posts from `src/content/blog/` |
 

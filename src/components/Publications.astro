@@ -1,92 +1,77 @@
 ---
 /**
- * The first paper gets the room: its figure across the column, then the
- * detail. The rest are one row each — thumbnail, title, venue, links.
+ * Papers, one row each: thumbnail, venue, title, authors, links. Every paper
+ * gets the same treatment; the venue line is where one stands out.
  */
 import { publications } from "../data/publications";
 
 const base = import.meta.env.BASE_URL;
 const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
-const [lead, ...rest] = publications;
 ---
 
 <section class="section" id="papers">
   <p class="label">Papers</p>
 
-  <div>
-    <article class="lead">
-      {lead.image && (
-        <a class="fig" href={lead.links[0]?.href} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-          <img src={src(lead.image)} alt="" width="1200" height="722" />
-        </a>
-      )}
-      <div class="lead-text">
-        <p class="label venue">{lead.venue} {lead.year}{lead.note && <> · {lead.note}</>}</p>
-        <h2 class="serif title"><a href={lead.links[0]?.href} target="_blank" rel="noopener">{lead.title}</a></h2>
-        <p class="authors">
-          {lead.authors.map((a, k) => <>{k > 0 && ", "}{a.me ? <b>{a.name}</b> : a.name}</>)}
-        </p>
-        <p class="abs">{lead.abstract}</p>
-        <div class="links">
-          {lead.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
-          {lead.bibtex && <button type="button" data-bib="0" aria-expanded="false">BibTeX</button>}
+  <ul class="pubs">
+    {publications.map((p, i) => (
+      <li>
+        {p.image && (
+          <a class="thumb" href={p.links[0]?.href ?? "#"} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+            <img src={src(p.image)} alt="" decoding="async" />
+          </a>
+        )}
+        <div class="text">
+          <p class="label venue">{p.venue} {p.year}{p.note && <> · {p.note}</>}</p>
+          <h3 class="title">
+            {p.links[0] ? <a href={p.links[0].href} target="_blank" rel="noopener">{p.title}</a> : p.title}
+          </h3>
+          <p class="authors">
+            {p.authors.map((a, k) => <>{k > 0 && ", "}{a.me ? <b>{a.name}</b> : a.name}</>)}
+          </p>
+          {(p.links.length > 0 || p.bibtex) && (
+            <div class="links">
+              {p.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
+              {p.bibtex && <button type="button" data-bib={i} aria-expanded="false">BibTeX</button>}
+            </div>
+          )}
+          {p.bibtex && <pre class="bib" id={`bib-${i}`} hidden><code>{p.bibtex}</code></pre>}
         </div>
-        {lead.bibtex && <pre class="bib" id="bib-0" hidden><code>{lead.bibtex}</code></pre>}
-      </div>
-    </article>
-
-    <ul class="rest">
-      {rest.map((p) => (
-        <li>
-          {p.image && <img class="thumb" src={src(p.image)} alt="" />}
-          <div>
-            <p class="label venue">{p.venue} {p.year}{p.note && <> · {p.note}</>}</p>
-            <h3 class="rtitle">{p.links[0] ? <a class="link" href={p.links[0].href} target="_blank" rel="noopener">{p.title}</a> : p.title}</h3>
-            <p class="authors">
-              {p.authors.map((a, k) => <>{k > 0 && ", "}{a.me ? <b>{a.name}</b> : a.name}</>)}
-            </p>
-            {p.links.length > 0 && (
-              <div class="links small">{p.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}</div>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
+      </li>
+    ))}
+  </ul>
 </section>
 
 <style>
-  .fig { display: block; border: 1px solid var(--line); background: #fff; }
-  .fig img { width: 100%; }
-  .lead-text { padding-top: 22px; }
-  .venue { margin-bottom: 10px; }
-  .title { font-size: clamp(26px, 3vw, 34px); line-height: 1.12; letter-spacing: -.015em; max-width: 24ch; }
-  .title a { color: var(--ink); }
+  .pubs { display: grid; }
+  .pubs li {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .pubs li:first-child { border-top: 0; padding-top: 0; }
+
+  .thumb { display: block; border: 1px solid var(--line); background: #fff; overflow: hidden; }
+  .thumb img { width: 100%; aspect-ratio: 5 / 3; object-fit: cover; }
+
+  .venue { margin-bottom: 6px; }
+  .title { font-size: 17px; font-weight: 500; line-height: 1.4; text-wrap: pretty; }
+  .title a { color: var(--ink); transition: color .15s; }
   .title a:hover { color: var(--accent); }
-  .authors { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .authors { margin-top: 5px; font-size: 14px; color: var(--muted); }
   .authors b { color: var(--ink); font-weight: 500; }
-  .abs { margin-top: 12px; font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 62ch; }
-  .lead .links { margin-top: 14px; }
+  .links { margin-top: 9px; font-size: 13.5px; }
 
   .bib {
-    margin: 14px 0 0; padding: 12px 14px;
+    margin: 12px 0 0; padding: 12px 14px;
     background: var(--paper-2); border: 1px solid var(--line);
     overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink-2);
   }
 
-  .rest { margin-top: 40px; display: grid; }
-  .rest li {
-    display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 22px;
-    padding: 20px 0; border-top: 1px solid var(--line);
-    align-items: start;
-  }
-  .thumb { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--line); }
-  .rtitle { font-size: 16px; font-weight: 500; line-height: 1.4; }
-  .rest .authors { margin-top: 6px; font-size: 13.5px; }
-  .links.small { margin-top: 8px; font-size: 13px; }
-
   @media (max-width: 600px) {
-    .rest li { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; }
+    .pubs li { grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
   }
 </style>
 
