@@ -1,7 +1,7 @@
 import { joinPaths, isRemotePath } from '@astrojs/internal-helpers/path';
 import { isRemoteAllowed } from '@astrojs/internal-helpers/remote';
-import { A as AstroError, E as ExpectedImage, L as LocalImageUsedWrongly, M as MissingImageDimension, q as UnsupportedImageFormat, I as IncompatibleDescriptorOptions, s as UnsupportedImageConversion, t as toStyleString, v as NoImageMetadata, w as FailedToFetchRemoteImageDimensions, x as RemoteImageNotAllowed, y as ExpectedImageOptions, z as ExpectedNotESMImage, B as InvalidImageService, c as createAstro, a as createComponent, C as ImageMissingAlt, m as maybeRenderHead, d as addAttribute, D as spreadAttributes, b as renderTemplate, G as ExperimentalFontsNotEnabled, H as FontFamilyNotFound, u as unescapeHTML } from './c.kGRaS9uN.js';
-import { D as DEFAULT_OUTPUT_FORMAT, V as VALID_SUPPORTED_FORMATS, b as DEFAULT_HASH_PROPS } from './c.G1yRkgiY.js';
+import { A as AstroError, E as ExpectedImage, L as LocalImageUsedWrongly, M as MissingImageDimension, q as UnsupportedImageFormat, I as IncompatibleDescriptorOptions, s as UnsupportedImageConversion, t as toStyleString, v as NoImageMetadata, w as FailedToFetchRemoteImageDimensions, x as RemoteImageNotAllowed, y as ExpectedImageOptions, z as ExpectedNotESMImage, B as InvalidImageService, c as createAstro, a as createComponent, C as ImageMissingAlt, m as maybeRenderHead, d as addAttribute, D as spreadAttributes, b as renderTemplate, G as ExperimentalFontsNotEnabled, H as FontFamilyNotFound, u as unescapeHTML } from './c.CCTiTH7s.js';
+import { D as DEFAULT_OUTPUT_FORMAT, V as VALID_SUPPORTED_FORMATS, b as DEFAULT_HASH_PROPS } from './c.BhK_Oduy.js';
 import * as mime from 'mrmime';
 import 'clsx';
 import 'piccolore';
@@ -1441,7 +1441,7 @@ async function getConfiguredImageService() {
   if (!globalThis?.astroAsset?.imageService) {
     const { default: service } = await import(
       // @ts-expect-error
-      './c.Crd3YF_N.js'
+      './c.BHZtaqps.js'
     ).catch((e) => {
       const error = new AstroError(InvalidImageService);
       error.cause = e;

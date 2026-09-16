@@ -3,7 +3,7 @@ import { Traverse } from 'neotraverse/modern';
 import pLimit from 'p-limit';
 import { z } from 'zod';
 import { removeBase, isRemotePath, prependForwardSlash } from '@astrojs/internal-helpers/path';
-import { A as AstroError, R as RenderUndefinedEntryError, a as createComponent, u as unescapeHTML, b as renderTemplate, U as UnknownContentCollectionError, e as renderUniqueStylesheet, f as renderScriptElement, g as createHeadAndContent, r as renderComponent } from './c.kGRaS9uN.js';
+import { A as AstroError, R as RenderUndefinedEntryError, a as createComponent, u as unescapeHTML, b as renderTemplate, U as UnknownContentCollectionError, e as renderUniqueStylesheet, f as renderScriptElement, g as createHeadAndContent, r as renderComponent } from './c.CCTiTH7s.js';
 import 'piccolore';
 import * as devalue from 'devalue';
 
@@ -255,7 +255,7 @@ const CONTENT_LAYER_IMAGE_REGEX = /__ASTRO_IMAGE_="([^"]+)"/g;
 async function updateImageReferencesInBody(html, fileName) {
   const { default: imageAssetMap } = await import('./c.DleWbedO.js');
   const imageObjects = /* @__PURE__ */ new Map();
-  const { getImage } = await import('./c.C5QiDnoz.js').then(n => n._);
+  const { getImage } = await import('./c.hoM8orCg.js').then(n => n._);
   for (const [_full, imagePath] of html.matchAll(CONTENT_LAYER_IMAGE_REGEX)) {
     try {
       const decodedImagePath = JSON.parse(imagePath.replaceAll("&#x22;", '"'));
