@@ -1,30 +1,37 @@
 /* ============================================================
    Aleksandr Razin — personal site.
-   Bone paper, ink, one cobalt accent. A display serif for the
-   few big words, a plain grotesk for the rest, mono for labels.
-   One theme; the photograph is the only colour on the page.
+   A dark plum room: the background is one slow gradient, the
+   type is cream and set in a text serif, links are lavender and
+   warm to rose under the pointer. One theme.
    ============================================================ */
 
 :root {
-  --paper:   #f3f0e8;
-  --paper-2: #ebe7dd;
-  --ink:     #111111;
-  --ink-2:   #4a4844;
-  --muted:   #85817a;
-  --line:    #d6d1c4;
-  --line-2:  #bdb7a8;
-  --accent:  #1f3bd6;
+  --bg-0:    #120a1c;
+  --bg-1:    #1c1029;
+  --bg-2:    #2b1a3d;
+  --card:    rgba(255, 255, 255, .045);
+  --card-2:  rgba(255, 255, 255, .08);
+  --line:    rgba(255, 255, 255, .11);
+  --line-2:  rgba(255, 255, 255, .22);
+  --ink:     #f3eee4;
+  --ink-2:   #d3cbdc;
+  --muted:   #9d93ad;
+  --accent:  #c8b5ff;
+  --rose:    #ff96b8;
+  --badge:   #7b5cff;
+  --shadow:  0 10px 30px rgba(0, 0, 0, .35);
 
-  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --serif: "Newsreader", Georgia, "Iowan Old Style", "Times New Roman", serif;
   --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --w: 1120px;
-  --gutter: 24px;
+  --side: 300px;
+  --w: 1180px;
+  --gutter: 28px;
+  --radius: 12px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -32,57 +39,56 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
 body {
   margin: 0;
-  background: var(--paper);
+  min-height: 100vh;
   color: var(--ink);
-  font: 400 16px/1.55 var(--sans);
+  background: var(--bg-0);
+  font: 400 17px/1.6 var(--serif);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
-  font-feature-settings: "ss01", "cv11";
+}
+
+/* the room: one slow gradient, fixed behind everything */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(100deg, var(--bg-0) 0%, var(--bg-0) 22%, var(--bg-1) 48%, var(--bg-2) 100%);
 }
 
 img { max-width: 100%; height: auto; display: block; }
 [hidden] { display: none !important; }
-a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+a { color: var(--accent); text-decoration: none; transition: color .15s; }
+a:hover { color: var(--rose); }
+:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; border-radius: 3px; }
 h1, h2, h3, p, ul, ol { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.15; letter-spacing: -.01em; }
+b, strong { font-weight: 600; color: var(--ink); }
 
-.wrap { max-width: var(--w); margin-inline: auto; padding-inline: var(--gutter); }
-
-/* mono label: the only uppercase on the page */
 .label {
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: .08em;
+  letter-spacing: .09em;
   text-transform: uppercase;
   color: var(--muted);
 }
 .mono { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-/* display serif */
-.serif { font-family: var(--serif); font-weight: 400; letter-spacing: -.01em; }
-
-/* a section: hairline on top, label in the left column, content on the right */
-.section {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 24px 48px;
-  padding-block: 40px 56px;
-  border-top: 1px solid var(--line);
+/* a section of the main column */
+.section { padding-block: 44px 8px; }
+.section > h2 {
+  font-size: 30px;
+  margin-bottom: 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
 }
-.section > .label { padding-top: 6px; }
-@media (max-width: 800px) {
-  .section { grid-template-columns: 1fr; gap: 18px; padding-block: 32px 40px; }
-}
-
-/* text links */
-.link { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: color .15s, border-color .15s; }
-.link:hover { color: var(--accent); border-color: var(--accent); }
 
 /* "arXiv · Code · BibTeX" rows */
-.links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.links { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 15px; }
 .links a, .links button { color: var(--accent); }
-.links a:hover, .links button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.links a:hover, .links button:hover { color: var(--rose); }
+.links a::before, .links button::before { content: "["; color: var(--muted); margin-right: 1px; }
+.links a::after, .links button::after { content: "]"; color: var(--muted); margin-left: 1px; }

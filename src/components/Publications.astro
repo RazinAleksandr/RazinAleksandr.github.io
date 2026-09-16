@@ -1,7 +1,7 @@
 ---
 /**
- * Papers, one row each: thumbnail, venue, title, authors, links. Every paper
- * gets the same treatment; the venue line is where one stands out.
+ * Papers as cards: the figure on the left with the venue as a badge over its
+ * corner, the detail on the right. Every paper gets the same card.
  */
 import { publications } from "../data/publications";
 
@@ -10,24 +10,22 @@ const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
 ---
 
 <section class="section" id="papers">
-  <p class="label">Papers</p>
-
+  <h2>Publications</h2>
   <ul class="pubs">
     {publications.map((p, i) => (
-      <li>
-        {p.image && (
-          <a class="thumb" href={p.links[0]?.href ?? "#"} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-            <img src={src(p.image)} alt="" />
-          </a>
-        )}
+      <li class="card">
+        <a class="fig" href={p.links[0]?.href ?? "#"} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+          <span class="badge">{p.venue} {p.year}</span>
+          {p.image && <img src={src(p.image)} alt="" />}
+        </a>
         <div class="text">
-          <p class="label venue">{p.venue} {p.year}{p.note && <> · {p.note}</>}</p>
           <h3 class="title">
             {p.links[0] ? <a href={p.links[0].href} target="_blank" rel="noopener">{p.title}</a> : p.title}
           </h3>
           <p class="authors">
             {p.authors.map((a, k) => <>{k > 0 && ", "}{a.me ? <b>{a.name}</b> : a.name}</>)}
           </p>
+          {p.note && <p class="note">{p.note}</p>}
           <div class="links">
             {p.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
             <button type="button" data-bib={i} aria-expanded="false">BibTeX</button>
@@ -40,36 +38,47 @@ const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
 </section>
 
 <style>
-  .pubs { display: grid; }
-  .pubs li {
+  .pubs { display: grid; gap: 18px; }
+  .card {
     display: grid;
-    grid-template-columns: 180px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr);
     gap: 24px;
-    padding: 22px 0;
-    border-top: 1px solid var(--line);
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     align-items: start;
+    transition: background .2s, border-color .2s;
   }
-  .pubs li:first-child { border-top: 0; padding-top: 0; }
+  .card:hover { background: var(--card-2); border-color: var(--line-2); }
 
-  .thumb { display: block; border: 1px solid var(--line); background: #fff; overflow: hidden; }
-  .thumb img { width: 100%; aspect-ratio: 5 / 3; object-fit: cover; }
+  .fig { position: relative; display: block; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: var(--shadow); }
+  .fig img { width: 100%; aspect-ratio: 5 / 3; object-fit: cover; }
+  .badge {
+    position: absolute; top: 10px; left: -4px; z-index: 1;
+    padding: 4px 12px 4px 14px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+    color: #fff; background: var(--badge);
+    border-radius: 0 6px 6px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
+  }
 
-  .venue { margin-bottom: 6px; }
-  .title { font-size: 17px; font-weight: 500; line-height: 1.4; text-wrap: pretty; }
-  .title a { color: var(--ink); transition: color .15s; }
-  .title a:hover { color: var(--accent); }
-  .authors { margin-top: 5px; font-size: 14px; color: var(--muted); }
-  .authors b { color: var(--ink); font-weight: 500; }
-  .links { margin-top: 9px; font-size: 13.5px; }
+  .title { font-size: 20px; font-weight: 500; line-height: 1.3; text-wrap: pretty; }
+  .title a { color: var(--ink); }
+  .title a:hover { color: var(--rose); }
+  .authors { margin-top: 8px; font-size: 15.5px; color: var(--muted); }
+  .authors b { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  .note { margin-top: 6px; font-size: 15px; color: var(--rose); font-style: italic; }
+  .links { margin-top: 12px; }
 
   .bib {
     margin: 12px 0 0; padding: 12px 14px;
-    background: var(--paper-2); border: 1px solid var(--line);
+    background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 8px;
     overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink-2);
   }
 
-  @media (max-width: 600px) {
-    .pubs li { grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 640px) {
+    .card { grid-template-columns: 1fr; gap: 14px; padding: 14px; }
   }
 </style>
 

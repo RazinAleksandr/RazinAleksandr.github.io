@@ -4,7 +4,7 @@ import { inlineMd } from "../lib/inline";
 ---
 
 <section class="section" id="news">
-  <p class="label">News</p>
+  <h2>News</h2>
   <ul class="news">
     {news.map((n) => (
       <li>
@@ -16,11 +16,9 @@ import { inlineMd } from "../lib/inline";
 </section>
 
 <style>
-  .news { display: grid; gap: 9px; max-width: 640px; }
-  .news li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 16px; align-items: baseline; }
-  .date { white-space: nowrap; }
-  .body { font-size: 15px; line-height: 1.5; color: var(--ink-2); }
-  .body :global(strong) { color: var(--ink); font-weight: 500; }
-  .body :global(a) { color: var(--accent); }
-  .body :global(a:hover) { text-decoration: underline; text-underline-offset: 4px; }
+  .news { display: grid; gap: 10px; }
+  .news li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+  .date { color: var(--accent); }
+  .body { font-size: 17px; color: var(--ink-2); }
+  .body :global(strong) { color: var(--ink); }
 </style>

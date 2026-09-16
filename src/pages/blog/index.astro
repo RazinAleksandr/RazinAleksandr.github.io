@@ -11,15 +11,15 @@ const posts = (await getCollection("blog", ({ data }) => import.meta.env.DEV || 
 
 <Base current="blog" title="Blog — Aleksandr Razin" description="Notes on generative vision, image restoration and shipping ML.">
   <section class="page">
-    <h1 class="serif">Blog</h1>
+    <h1>Blog</h1>
     {posts.length === 0 ? (
-      <p class="empty">Nothing here yet. The <a class="link" href={href("#papers")}>papers</a> and <a class="link" href={href("#projects")}>projects</a> are the shortest route to what I work on.</p>
+      <p class="empty">Nothing here yet. The <a href={href("#papers")}>papers</a> and <a href={href("#projects")}>projects</a> are the shortest route to what I work on.</p>
     ) : (
       <ol class="posts">
         {posts.map((p) => (
           <li>
             <p class="mono">{formatDate(p.data.date)} · {readingTime(p.body ?? "")} min{p.data.draft && " · draft"}</p>
-            <h2 class="serif"><a href={href(`blog/${p.id}`)}>{p.data.title}</a></h2>
+            <h2><a href={href(`blog/${p.id}`)}>{p.data.title}</a></h2>
             <p class="excerpt">{p.data.description}</p>
           </li>
         ))}
@@ -29,13 +29,13 @@ const posts = (await getCollection("blog", ({ data }) => import.meta.env.DEV || 
 </Base>
 
 <style>
-  .page { padding-block: 40px 56px; }
-  h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1; letter-spacing: -.02em; margin-bottom: 28px; }
+  .page { padding-block: 0 40px; }
+  h1 { font-size: clamp(32px, 4vw, 44px); line-height: 1; margin-bottom: 24px; }
   .empty { color: var(--ink-2); max-width: 52ch; }
   .posts { display: grid; }
   .posts li { padding: 22px 0; border-top: 1px solid var(--line); }
   h2 { font-size: 28px; line-height: 1.15; margin-top: 6px; }
   h2 a { color: var(--ink); }
-  h2 a:hover { color: var(--accent); }
+  h2 a:hover { color: var(--rose); }
   .excerpt { margin-top: 8px; color: var(--ink-2); max-width: 62ch; }
 </style>

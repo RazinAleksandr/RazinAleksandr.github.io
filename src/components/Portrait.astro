@@ -1,8 +1,8 @@
 ---
 /**
  * The portrait as a loop of two states: noise, as a latent before sampling,
- * and the photograph, as its decode. The noise is drawn in the paper's own
- * two tones so it belongs to the page; the photograph is the only colour.
+ * and the photograph, as its decode. The noise is drawn between the page's
+ * ground and its lavender so it belongs to the page.
  *
  * Noise (hold) → denoise → photograph (hold) → back to noise, about seven
  * seconds a loop. It pauses off-screen and in a hidden tab, and with reduced
@@ -22,7 +22,7 @@ const { src, alt } = Astro.props;
     position: relative;
     aspect-ratio: 1;
     overflow: hidden;
-    background: var(--paper-2);
+    background: var(--bg-1);
   }
   .portrait img, .portrait canvas {
     position: absolute; inset: 0;
@@ -41,7 +41,7 @@ const { src, alt } = Astro.props;
   if (box && img && cv && !reduced) {
     const ctx = cv.getContext("2d")!;
     const GRAIN = 2;              // css px per noise cell
-    const INK = [17, 17, 17], PAPER = [243, 240, 232];
+    const INK = [18, 10, 28], PAPER = [200, 181, 255];
 
     // timeline, ms
     const NOISE = 1400, DENOISE = 2200, PHOTO = 3000, RENOISE = 700;

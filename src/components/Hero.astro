@@ -1,89 +1,20 @@
 ---
-/**
- * The name as a masthead, the statement under it, the looping portrait on
- * the right. Nothing on this screen needs to be read twice.
- */
+/** The bio. Who, where now and on what (bold), where before, degree. */
 import { profile } from "../data/profile";
 import { inlineMd } from "../lib/inline";
-import Portrait from "./Portrait.astro";
-import Icon from "./Icon.astro";
-
-const base = import.meta.env.BASE_URL;
-const portrait = `${base}portrait-900.jpg`.replace(/\/{2,}/g, "/");
 ---
 
-<section class="hero">
-  <h1 class="serif name">
-    <span>{profile.first}</span>
-    <span class="last">{profile.last}</span>
-  </h1>
-
-  <div class="frame">
-    <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
-  </div>
-
-  <div class="text">
-    <p class="label role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a>, {profile.location}</p>
-    <div class="intro">
-      {profile.intro.map((para) => <p set:html={inlineMd(para)} />)}
-    </div>
-    <ul class="contacts label">
-      <li><a href={`mailto:${profile.email}`}><Icon name="mail" /> Email</a></li>
-      <li><a href={profile.links.scholar} target="_blank" rel="noopener"><Icon name="scholar" size={13} /> Scholar</a></li>
-      <li><a href={profile.links.github} target="_blank" rel="noopener"><Icon name="github" size={13} /> GitHub</a></li>
-      <li><a href={profile.links.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" size={12} /> LinkedIn</a></li>
-      <li><a href={profile.links.telegram} target="_blank" rel="noopener"><Icon name="telegram" size={13} /> Telegram</a></li>
-    </ul>
+<section class="section about" id="about">
+  <h2>About me</h2>
+  <div class="bio">
+    {profile.intro.map((para) => <p set:html={inlineMd(para)} />)}
   </div>
 </section>
 
 <style>
-  .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    grid-template-areas: "name frame" "text frame";
-    column-gap: 56px;
-    padding-block: 48px 64px;
-    align-items: start;
-  }
-
-  .name {
-    grid-area: name;
-    font-size: clamp(64px, 10.5vw, 132px);
-    line-height: .9;
-    letter-spacing: -.03em;
-    display: grid;
-    margin-bottom: 40px;
-  }
-  .name .last { font-style: italic; color: var(--accent); }
-
-  .frame { grid-area: frame; width: 100%; }
-
-  .text { grid-area: text; max-width: 540px; }
-  .role { margin-bottom: 20px; }
-  .role a { color: var(--ink); }
-  .role a:hover { color: var(--accent); }
-  .intro { display: grid; gap: 14px; font-size: 17px; line-height: 1.6; color: var(--ink-2); max-width: 54ch; }
-  .intro :global(strong) { color: var(--ink); font-weight: 500; }
-  .intro :global(a) { color: var(--ink); border-bottom: 1px solid var(--line-2); }
-  .intro :global(a:hover) { color: var(--accent); border-color: var(--accent); }
-
-  .contacts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; }
-  .contacts a { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); transition: color .15s; }
-  .contacts a:hover { color: var(--accent); }
-  .contacts svg { color: var(--muted); }
-  .contacts a:hover svg { color: var(--accent); }
-
-  @media (max-width: 900px) {
-    .hero { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 36px; }
-  }
-  @media (max-width: 700px) {
-    .hero {
-      grid-template-columns: 1fr;
-      grid-template-areas: "name" "frame" "text";
-      padding-block: 32px 48px;
-    }
-    .name { font-size: clamp(56px, 17vw, 96px); margin-bottom: 28px; }
-    .frame { max-width: 380px; margin-bottom: 32px; }
-  }
+  .about { padding-top: 0; }
+  .bio { display: grid; gap: 16px; font-size: 19px; line-height: 1.6; color: var(--ink-2); }
+  .bio :global(strong) { color: var(--ink); font-weight: 600; }
+  .bio :global(a) { color: var(--accent); border-bottom: 1px solid var(--line-2); }
+  .bio :global(a:hover) { color: var(--rose); border-color: var(--rose); }
 </style>

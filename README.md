@@ -2,12 +2,14 @@
 
 Personal site — Astro, static, deployed to GitHub Pages by Actions.
 
-Bone paper, ink and one cobalt accent; a display serif for the few big words,
-a plain grotesk for the rest, mono for labels. One theme. The portrait is a
-loop of two states — noise, as a latent before sampling, and the photograph,
-as its decode — drawn in the page's own two tones so the photograph stays the
-only colour on the page. It pauses off-screen and in a hidden tab; with
-reduced motion it is just the photograph.
+A dark plum room: one slow gradient behind everything, cream type set in
+Newsreader, lavender links that warm to rose. A sticky sidebar carries the
+portrait, name and contacts; the main column has the bio, a running strip of
+where I've worked, news, papers as cards with the venue badged over the
+figure, and projects. The portrait is a loop of two states — noise, as a
+latent before sampling, and the photograph, as its decode — drawn between
+the page's ground and its lavender. It pauses off-screen; with reduced motion
+it is just the photograph.
 
 ## Running it
 
@@ -24,7 +26,7 @@ Node 22+. No other setup.
 
 | Route | What it is |
 | --- | --- |
-| `/` | Name, statement, where I've worked (logos), news, papers, projects |
+| `/` | Bio, where I've worked (running strip), news, papers, projects |
 | `/cv` | The CV as a PDF, embedded, with a download button |
 | `/blog` | Posts from `src/content/blog/` |
 

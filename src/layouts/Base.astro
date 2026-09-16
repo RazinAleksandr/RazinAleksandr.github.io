@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { profile } from "../data/profile";
+import Portrait from "../components/Portrait.astro";
 import Icon from "../components/Icon.astro";
 
 interface Props { title?: string; description?: string; current?: string }
@@ -13,8 +14,10 @@ const {
 const base = import.meta.env.BASE_URL;
 const href = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
 const home = current === "home";
+const portrait = href("portrait-900.jpg");
 
 const nav = [
+  ["about", "About", home ? "#about" : href("#about")],
   ["news", "News", home ? "#news" : href("#news")],
   ["papers", "Papers", home ? "#papers" : href("#papers")],
   ["projects", "Projects", home ? "#projects" : href("#projects")],
@@ -24,7 +27,7 @@ const nav = [
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E" +
-  "%3Crect width='32' height='32' fill='%23f3f0e8'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%231f3bd6'/%3E%3C/svg%3E";
+  "%3Crect width='32' height='32' rx='7' fill='%23120a1c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8b5ff'/%3E%3C/svg%3E";
 ---
 
 <!doctype html>
@@ -34,7 +37,7 @@ const favicon =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#f3f0e8" />
+    <meta name="theme-color" content="#120a1c" />
     <link rel="icon" href={favicon} />
     <link rel="sitemap" href={href("sitemap-index.xml")} />
     <meta property="og:type" content="profile" />
@@ -45,71 +48,93 @@ const favicon =
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" />
   </head>
 
   <body>
     <header class="top">
-      <div class="wrap bar">
-        <a class="label home" href={href("")}>{profile.name}</a>
-        <nav class="label" aria-label="Site">
-          {nav.map(([id, text, url]) => (
-            <a href={url} aria-current={current === id ? "page" : undefined}>{text}</a>
-          ))}
-        </nav>
-      </div>
+      <nav class="wrap topnav label" aria-label="Site">
+        {nav.map(([id, text, url]) => (
+          <a href={url} aria-current={current === id ? "page" : undefined}>{text}</a>
+        ))}
+      </nav>
     </header>
 
-    <main class="wrap">
-      <slot />
-    </main>
+    <div class="wrap layout">
+      <aside class="side">
+        <a class="photo" href={href("")} aria-label="Home">
+          <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
+        </a>
+        <h1 class="name">{profile.name}</h1>
+        <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a></p>
+        <p class="where label">{profile.location}, Bulgaria</p>
 
-    <footer class="wrap foot">
-      <div class="row">
-        <a class="mail" href={`mailto:${profile.email}`}>{profile.email}</a>
-        <div class="social">
-          <a href={profile.links.scholar} target="_blank" rel="noopener" aria-label="Google Scholar"><Icon name="scholar" size={15} /></a>
-          <a href={profile.links.github} target="_blank" rel="noopener" aria-label="GitHub"><Icon name="github" size={15} /></a>
-          <a href={profile.links.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn"><Icon name="linkedin" size={14} /></a>
-          <a href={profile.links.telegram} target="_blank" rel="noopener" aria-label="Telegram"><Icon name="telegram" size={15} /></a>
-        </div>
-      </div>
-      <p class="label">© {new Date().getFullYear()} {profile.name} · {profile.location}</p>
-    </footer>
+        <ul class="contacts">
+          <li><a href={`mailto:${profile.email}`}><Icon name="mail" size={15} /> {profile.email}</a></li>
+          <li><a href={profile.links.scholar} target="_blank" rel="noopener"><Icon name="scholar" size={15} /> Google Scholar</a></li>
+          <li><a href={profile.links.github} target="_blank" rel="noopener"><Icon name="github" size={15} /> GitHub</a></li>
+          <li><a href={profile.links.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" size={14} /> LinkedIn</a></li>
+          <li><a href={profile.links.telegram} target="_blank" rel="noopener"><Icon name="telegram" size={15} /> Telegram</a></li>
+          <li><a href={href("cv")}><Icon name="file" size={15} /> Curriculum vitae</a></li>
+        </ul>
+      </aside>
+
+      <main class="main">
+        <slot />
+        <footer class="foot label">© {new Date().getFullYear()} {profile.name}</footer>
+      </main>
+    </div>
   </body>
 </html>
 
 <style>
-  .top {
-    position: sticky; top: 0; z-index: 20;
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
-    backdrop-filter: blur(8px);
-  }
-  .bar {
-    display: flex; align-items: center; justify-content: space-between; gap: 20px;
-    height: 56px;
-    border-bottom: 1px solid var(--line);
-  }
-  .home { color: var(--ink); white-space: nowrap; }
-  nav { display: flex; gap: 22px; }
-  nav a { color: var(--muted); padding: 4px 0; transition: color .15s; }
-  nav a:hover, nav a[aria-current="page"] { color: var(--ink); }
-  nav a[aria-current="page"] { box-shadow: inset 0 -1px 0 var(--ink); }
+  .wrap { max-width: var(--w); margin-inline: auto; padding-inline: var(--gutter); }
 
-  .foot { padding-block: 40px 48px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
-  .row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-  .mail { font-family: var(--serif); font-size: 26px; letter-spacing: -.01em; color: var(--ink); }
-  .mail:hover { color: var(--accent); }
-  .social { display: flex; gap: 6px; }
-  .social a {
-    width: 34px; height: 34px; display: grid; place-items: center;
-    border: 1px solid var(--line); border-radius: 50%; color: var(--ink-2);
-    transition: color .15s, border-color .15s;
-  }
-  .social a:hover { color: var(--accent); border-color: var(--accent); }
+  .top { position: sticky; top: 0; z-index: 20; background: rgba(18, 10, 28, .55); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .topnav { display: flex; gap: 26px; height: 52px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav a { color: var(--muted); white-space: nowrap; }
+  .topnav a:hover, .topnav a[aria-current="page"] { color: var(--ink); }
 
-  @media (max-width: 600px) {
-    nav { gap: 14px; }
-    .mail { font-size: 21px; }
+  .layout {
+    display: grid;
+    grid-template-columns: var(--side) minmax(0, 1fr);
+    gap: 64px;
+    padding-top: 44px;
+  }
+
+  .side {
+    position: sticky; top: 76px; align-self: start;
+    display: grid; gap: 6px; justify-items: start;
+  }
+  .photo { display: block; width: 100%; margin-bottom: 14px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .name { font-size: 34px; font-weight: 500; }
+  .role { font-size: 17px; color: var(--ink-2); }
+  .role a { color: var(--ink); }
+  .role a:hover { color: var(--rose); }
+  .where { margin-top: 2px; }
+
+  .contacts { margin-top: 22px; display: grid; gap: 8px; }
+  .contacts a { display: inline-flex; align-items: center; gap: 10px; color: var(--ink-2); font-size: 16px; }
+  .contacts a:hover { color: var(--rose); }
+  .contacts svg { color: var(--accent); flex: none; }
+
+  .main { min-width: 0; padding-bottom: 40px; }
+  .foot { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; gap: 28px; padding-top: 28px; }
+    .side {
+      position: static;
+      grid-template-columns: 112px minmax(0, 1fr);
+      grid-template-areas: "photo name" "photo role" "photo where" "contacts contacts";
+      column-gap: 18px; align-items: center;
+    }
+    .photo { grid-area: photo; margin: 0; }
+    .name { grid-area: name; font-size: 26px; align-self: end; }
+    .role { grid-area: role; font-size: 15px; }
+    .where { grid-area: where; align-self: start; }
+    .contacts { grid-area: contacts; display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; }
+    .contacts a { font-size: 14.5px; }
   }
 </style>

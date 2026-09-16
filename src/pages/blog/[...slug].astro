@@ -21,7 +21,7 @@ const href = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
     <a class="back label" href={href("blog")}><Icon name="arrowl" size={13} /> All posts</a>
     <header>
       <p class="mono">{formatDate(post.data.date)} · {readingTime(post.body ?? "")} min read{post.data.draft && " · draft"}</p>
-      <h1 class="serif">{post.data.title}</h1>
+      <h1>{post.data.title}</h1>
       <p class="desc">{post.data.description}</p>
       {post.data.tags.length > 0 && <p class="label tags">{post.data.tags.join(" · ")}</p>}
     </header>
@@ -30,26 +30,26 @@ const href = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
 </Base>
 
 <style>
-  .post { padding-block: 32px 56px; max-width: 720px; }
+  .post { padding-block: 0 40px; max-width: 720px; }
   .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); margin-bottom: 28px; }
-  .back:hover { color: var(--accent); }
-  h1 { margin-top: 8px; font-size: clamp(36px, 6vw, 56px); line-height: 1.02; letter-spacing: -.02em; text-wrap: balance; }
+  .back:hover { color: var(--rose); }
+  h1 { margin-top: 8px; font-size: clamp(32px, 5vw, 48px); line-height: 1.05; text-wrap: balance; }
   .desc { margin-top: 14px; font-size: 19px; line-height: 1.5; color: var(--ink-2); }
   .tags { margin-top: 12px; }
 
   .prose { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); font-size: 17px; line-height: 1.7; }
-  .prose :global(h2) { margin: 36px 0 12px; font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.1; }
+  .prose :global(h2) { margin: 36px 0 12px; font-size: 28px; line-height: 1.15; }
   .prose :global(h3) { margin: 28px 0 10px; font-size: 19px; font-weight: 500; }
   .prose :global(p) { margin: 0 0 16px; }
   .prose :global(a) { color: var(--accent); }
-  .prose :global(a:hover) { text-decoration: underline; text-underline-offset: 4px; }
+  .prose :global(a:hover) { color: var(--rose); }
   .prose :global(ul), .prose :global(ol) { margin: 0 0 16px; padding-left: 22px; list-style: disc; }
   .prose :global(ol) { list-style: decimal; }
   .prose :global(li) { margin-bottom: 6px; }
   .prose :global(img) { border: 1px solid var(--line); }
   .prose :global(blockquote) { margin: 0 0 16px; padding-left: 18px; border-left: 2px solid var(--accent); font-family: var(--serif); font-size: 21px; color: var(--ink-2); }
-  .prose :global(code) { font-family: var(--mono); font-size: .86em; background: var(--paper-2); padding: 1px 5px; }
-  .prose :global(pre) { margin: 0 0 18px; padding: 14px 16px; background: var(--paper-2); border: 1px solid var(--line); overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  .prose :global(code) { font-family: var(--mono); font-size: .86em; background: rgba(0,0,0,.35); padding: 1px 5px; border-radius: 4px; }
+  .prose :global(pre) { margin: 0 0 18px; padding: 14px 16px; background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
   .prose :global(pre code) { background: none; padding: 0; font-size: inherit; }
   .prose :global(table) { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 15px; }
   .prose :global(th), .prose :global(td) { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }

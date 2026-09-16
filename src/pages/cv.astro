@@ -10,31 +10,31 @@ const pdf = `${base}${profile.cv.file}`.replace(/\/{2,}/g, "/");
 <Base current="cv" title={`CV — ${profile.name}`} description={`Curriculum vitae of ${profile.name} (PDF).`}>
   <section class="page">
     <div class="head">
-      <h1 class="serif">Curriculum vitae</h1>
+      <h1>Curriculum vitae</h1>
       <div class="side">
         <span class="mono">Updated {profile.cv.updated}</span>
         <a class="dl" href={pdf} download><Icon name="download" size={14} /> Download PDF</a>
       </div>
     </div>
     <object class="pdf" data={`${pdf}#view=FitH`} type="application/pdf" aria-label="CV as PDF">
-      <p class="fallback">Your browser does not preview PDFs here — <a class="link" href={pdf} target="_blank" rel="noopener">open the CV</a> in a new tab.</p>
+      <p class="fallback">Your browser does not preview PDFs here — <a href={pdf} target="_blank" rel="noopener">open the CV</a> in a new tab.</p>
     </object>
   </section>
 </Base>
 
 <style>
-  .page { padding-block: 40px 56px; }
+  .page { padding-block: 0 40px; }
   .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
-  h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1; letter-spacing: -.02em; }
+  h1 { font-size: clamp(32px, 4vw, 44px); line-height: 1; }
   .side { display: flex; align-items: center; gap: 18px; }
   .dl {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 14px; font-weight: 500;
-    color: var(--paper); background: var(--ink);
+    color: var(--bg-0); background: var(--accent);
     padding: 9px 16px; border-radius: 999px;
     transition: background .15s;
   }
-  .dl:hover { background: var(--accent); }
-  .pdf { display: block; width: 100%; height: min(1100px, calc(100vh - 200px)); border: 1px solid var(--line); background: #fff; }
+  .dl:hover { background: var(--rose); color: var(--bg-0); }
+  .pdf { display: block; width: 100%; height: min(1100px, calc(100vh - 200px)); border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
   .fallback { padding: 24px; color: var(--ink-2); }
 </style>
