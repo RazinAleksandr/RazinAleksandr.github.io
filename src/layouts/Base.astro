@@ -17,7 +17,7 @@ const home = current === "home";
 const portrait = href("portrait-900.jpg");
 
 const nav = [
-  ["about", "About", home ? "#about" : href("#about")],
+  ["home", "Profile", href("")],
   ["news", "News", home ? "#news" : href("#news")],
   ["papers", "Papers", home ? "#papers" : href("#papers")],
   ["projects", "Projects", home ? "#projects" : href("#projects")],
@@ -60,8 +60,8 @@ const favicon =
       </nav>
     </header>
 
-    <div class="wrap layout">
-      <aside class="side">
+    <div class:list={["wrap", "layout", !home && "single"]}>
+      {home && <aside class="side">
         <a class="photo" href={href("")} aria-label="Home">
           <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
         </a>
@@ -75,9 +75,8 @@ const favicon =
           <li><a href={profile.links.github} target="_blank" rel="noopener"><Icon name="github" size={15} /> GitHub</a></li>
           <li><a href={profile.links.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" size={14} /> LinkedIn</a></li>
           <li><a href={profile.links.telegram} target="_blank" rel="noopener"><Icon name="telegram" size={15} /> Telegram</a></li>
-          <li><a href={href("cv")}><Icon name="file" size={15} /> Curriculum vitae</a></li>
         </ul>
-      </aside>
+      </aside>}
 
       <main class="main">
         <slot />
@@ -95,6 +94,12 @@ const favicon =
   .topnav::-webkit-scrollbar { display: none; }
   .topnav a { color: var(--muted); white-space: nowrap; }
   .topnav a:hover, .topnav a[aria-current="page"] { color: var(--ink); }
+  .topnav a:first-child {
+    color: var(--ink);
+    padding: 5px 12px; margin-left: -12px;
+    border: 1px solid var(--line-2); border-radius: 999px;
+  }
+  .topnav a:first-child:hover { border-color: var(--rose); color: var(--rose); }
 
   .layout {
     display: grid;
@@ -102,6 +107,8 @@ const favicon =
     gap: 64px;
     padding-top: 44px;
   }
+  /* pages other than the profile: one column, the profile is a click away */
+  .layout.single { grid-template-columns: minmax(0, 1fr); max-width: 880px; }
 
   .side {
     position: sticky; top: 76px; align-self: start;
