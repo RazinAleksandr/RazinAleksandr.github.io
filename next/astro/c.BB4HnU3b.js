@@ -63,9 +63,9 @@ const $$Base = createComponent(($$result, $$props, $$slots) => {
   const href = (p) => `${base}${p}`.replace(/\/{2,}/g, "/");
   const home = current === "home";
   const nav = [
+    ["news", "News", home ? "#news" : href("#news")],
     ["papers", "Papers", home ? "#papers" : href("#papers")],
     ["projects", "Projects", home ? "#projects" : href("#projects")],
-    ["news", "News", home ? "#news" : href("#news")],
     ["cv", "CV", href("cv")],
     ["blog", "Blog", href("blog")]
   ];
