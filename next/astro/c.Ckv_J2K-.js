@@ -17,10 +17,10 @@ const profile = {
    * Two short paragraphs, inline markdown, no numbers.
    */
   intro: [
-    "I'm Aleksandr Razin, a Research Scientist at [INSAIT](https://insait.ai/) working with [Jinjin Gu](https://insait.ai/dr-jinjin-gu/), and an ELLIS PhD student. My research focuses on **embodied visual agents — generative world models, persistent 3D scene state and vision-language-action policies for long-horizon tasks** — and on **efficient diffusion models** for high-resolution generation and restoration.",
-    "Previously I worked on video restoration and diffusion at Huawei, founded a computer-vision startup, and built the agentic copilot at TradingView. I hold an M.Sc. in Machine Learning from ITMO University."
+    "I'm Aleksandr Razin, a Research Scientist at [INSAIT](https://insait.ai/) and an ELLIS PhD student, working with [Dr. Jinjin Gu](https://insait.ai/dr-jinjin-gu/). My research focuses on **visual agents and generative world models for embodied AI.**",
+    "Prior to this, I worked on video restoration and diffusion models at Huawei, founded a computer-vision startup, and built the agentic copilot at TradingView. I earned my M.Sc. in Machine Learning at ITMO University."
   ],
-  tagline: "Visual agents, generative world models and image restoration.",
+  tagline: "Visual agents and generative world models for embodied AI.",
   links: {
     github: "https://github.com/RazinAleksandr",
     linkedin: "https://www.linkedin.com/in/a-razin/",
