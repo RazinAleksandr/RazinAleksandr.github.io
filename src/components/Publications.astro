@@ -17,7 +17,7 @@ const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
       <li>
         {p.image && (
           <a class="thumb" href={p.links[0]?.href ?? "#"} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-            <img src={src(p.image)} alt="" decoding="async" />
+            <img src={src(p.image)} alt="" />
           </a>
         )}
         <div class="text">
@@ -28,13 +28,11 @@ const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
           <p class="authors">
             {p.authors.map((a, k) => <>{k > 0 && ", "}{a.me ? <b>{a.name}</b> : a.name}</>)}
           </p>
-          {(p.links.length > 0 || p.bibtex) && (
-            <div class="links">
-              {p.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
-              {p.bibtex && <button type="button" data-bib={i} aria-expanded="false">BibTeX</button>}
-            </div>
-          )}
-          {p.bibtex && <pre class="bib" id={`bib-${i}`} hidden><code>{p.bibtex}</code></pre>}
+          <div class="links">
+            {p.links.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
+            <button type="button" data-bib={i} aria-expanded="false">BibTeX</button>
+          </div>
+          <pre class="bib" id={`bib-${i}`} hidden><code>{p.bibtex}</code></pre>
         </div>
       </li>
     ))}

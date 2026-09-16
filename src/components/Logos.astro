@@ -1,56 +1,77 @@
 ---
 /**
- * One row, oldest on the left. Marks are drawn in ink at a common height and
- * take their own colour back on hover; nothing else is said about them here.
+ * Where I've worked as a running strip: oldest on the left, newest on the
+ * right, and when the newest passes it starts again from the oldest. Each
+ * stop is the mark, the name and the dates. It pauses under the pointer;
+ * with reduced motion it is a plain row that wraps.
  */
 import { orgs } from "../data/logos";
 import Icon from "./Icon.astro";
 
 const base = import.meta.env.BASE_URL;
 const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
+const when = (o: (typeof orgs)[number]) => `${o.from} — ${o.to}`;
 ---
 
 <section class="section band" aria-label="Where I've worked">
   <p class="label">Previously</p>
-  <ul class="row">
-    {orgs.map((o) => (
-      <li>
-        <a href={o.href} target="_blank" rel="noopener" title={`${o.name} · ${o.years}`}>
-          {o.img ? (
-            <img src={src(o.img)} alt={o.name} style={`aspect-ratio: ${o.ratio ?? 3}`} />
-          ) : o.icon ? (
-            <span class="mark"><Icon name={o.icon} size={22} /><span>{o.name}</span></span>
-          ) : (
-            <span class="word serif">{o.name}</span>
-          )}
-          <span class="mono years">{o.years}</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+
+  <div class="marquee">
+    <ul class="track">
+      {[0, 1].map((copy) =>
+        orgs.map((o) => (
+          <li aria-hidden={copy === 1 ? "true" : undefined}>
+            <a class="stop" href={o.href} target="_blank" rel="noopener" tabindex={copy === 1 ? -1 : undefined}>
+              <span class="mark">
+                {o.img ? (
+                  <img src={src(o.img)} alt="" style={`aspect-ratio: ${o.ratio ?? 3}`} />
+                ) : o.icon ? (
+                  <><Icon name={o.icon} size={22} /><span class="name">{o.name}</span></>
+                ) : (
+                  <span class="word serif">{o.name}</span>
+                )}
+              </span>
+              <span class="mono when">{when(o)}{o.role && <> · {o.role}</>}</span>
+            </a>
+          </li>
+        ))
+      )}
+    </ul>
+  </div>
 </section>
 
 <style>
-  .band { grid-template-columns: 1fr; gap: 22px; padding-block: 32px 40px; }
-  .row {
-    display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
-    gap: 22px 36px;
-  }
-  .row a {
-    display: grid; gap: 8px; justify-items: start;
-    color: var(--ink);
-  }
-  .row img, .mark, .word { height: 26px; }
-  .row img { width: auto; filter: grayscale(1) brightness(.35) contrast(1.2); opacity: .9; transition: filter .2s, opacity .2s; }
-  .row a:hover img { filter: none; opacity: 1; }
-  .mark {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-weight: 600; font-size: 17px; letter-spacing: -.01em;
-  }
-  .mark svg { color: var(--ink); }
-  .word { font-size: 24px; line-height: 26px; letter-spacing: -.01em; }
-  .years { font-size: 11px; color: var(--muted); }
-  .row a:hover .years { color: var(--accent); }
+  .band { grid-template-columns: 1fr; gap: 20px; padding-block: 32px 36px; }
 
-  @media (max-width: 700px) { .row { justify-content: flex-start; gap: 20px 32px; } }
+  .marquee {
+    overflow: hidden;
+    /* fade the ends so stops appear and leave softly */
+    -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    gap: 72px;
+    padding-right: 72px;              /* the same gap between the last and the repeated first */
+    animation: run 42s linear infinite;
+  }
+  .marquee:hover .track { animation-play-state: paused; }
+  @keyframes run { to { transform: translateX(-50%); } }
+
+  .stop { display: grid; gap: 9px; justify-items: start; color: var(--ink); white-space: nowrap; }
+  .mark { height: 26px; display: inline-flex; align-items: center; gap: 8px; }
+  .mark img { height: 26px; width: auto; filter: grayscale(1) brightness(.35) contrast(1.2); opacity: .9; transition: filter .2s, opacity .2s; }
+  .stop:hover img { filter: none; opacity: 1; }
+  .mark svg { color: var(--ink); }
+  .name { font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+  .word { font-size: 24px; line-height: 26px; letter-spacing: -.01em; }
+  .when { font-size: 11.5px; color: var(--muted); }
+  .stop:hover .when { color: var(--accent); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { mask: none; -webkit-mask: none; }
+    .track { animation: none; width: auto; flex-wrap: wrap; gap: 22px 40px; padding-right: 0; }
+    .track li[aria-hidden="true"] { display: none; }
+  }
 </style>

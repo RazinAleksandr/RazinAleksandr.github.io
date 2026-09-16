@@ -12,12 +12,12 @@ export type Publication = {
   authors: { name: string; me?: boolean }[];
   venue: string;
   year: string;
-  /** Short note after the venue, e.g. an award. */
+  /** Short note after the venue, e.g. an award. Every entry has `bibtex`. */
   note?: string;
   abstract: string;
   image?: string;
   links: { label: string; href: string }[];
-  bibtex?: string;
+  bibtex: string;
 };
 
 export const publications: Publication[] = [
@@ -66,7 +66,21 @@ export const publications: Publication[] = [
     abstract:
       "Fine-tuning pretrained language models on structured, diverse online forum data to improve question answering in the programming domain.",
     image: "pubs/qa-model.png",
-    links: [],
+    links: [
+      { label: "DOI", href: "https://doi.org/10.17586/2226-1494-2024-24-6-1024-1034" },
+      { label: "Journal", href: "https://ntv.ifmo.ru/en/article/23225/gorbatovskiy_a.v._i_dr.uluchshenie_voprosno-otvetnyh_sistem_v_oblasti_programmirovaniya_s_doobucheniem_yazykovyh_modeley_na_strukturirovannyh_raznorodnyh_dannyh_onlayn-forumov.htm" },
+    ],
+    bibtex: `@article{gorbatovski2024qa,
+  title   = {Improving question answering in programming domain with pretrained
+             language model fine-tuning using structured diverse online forum data},
+  author  = {Gorbatovski, Alexey and Razin, Aleksandr and Aliev, Auezh and Kovalchuk, Sergey},
+  journal = {Scientific and Technical Journal of Information Technologies, Mechanics and Optics},
+  volume  = {24},
+  number  = {6},
+  pages   = {1024--1034},
+  year    = {2024},
+  doi     = {10.17586/2226-1494-2024-24-6-1024-1034}
+}`,
   },
   {
     title:
@@ -80,7 +94,6 @@ export const publications: Publication[] = [
     ],
     venue: "Infrastructures",
     year: "2022",
-    note: "MDPI 7(6), 75",
     abstract:
       "A crawling robot for surveying pipelines and metal structures of complex spatial configuration at oil and gas facilities, with on-device perception replacing manual inspection.",
     image: "pubs/robot-crawler.png",
@@ -88,5 +101,15 @@ export const publications: Publication[] = [
       { label: "DOI", href: "https://doi.org/10.3390/infrastructures7060075" },
       { label: "MDPI", href: "https://www.mdpi.com/2412-3811/7/6/75" },
     ],
+    bibtex: `@article{pshenin2022crawler,
+  title   = {Robot Crawler for Surveying Pipelines and Metal Structures of Complex Spatial Configuration},
+  author  = {Pshenin, Vladimir and Liagova, Anastasia and Razin, Aleksandr and Skorobogatov, Alexander and Komarovsky, Maxim},
+  journal = {Infrastructures},
+  volume  = {7},
+  number  = {6},
+  pages   = {75},
+  year    = {2022},
+  doi     = {10.3390/infrastructures7060075}
+}`,
   },
 ];

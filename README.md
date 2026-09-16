@@ -34,17 +34,20 @@ All of it is data, not markup — edit these and the page follows:
 
 | File | What it drives |
 | --- | --- |
-| `src/data/profile.ts` | name, role, headline, the two-sentence intro, links, CV file |
+| `src/data/profile.ts` | name, role, headline, intro, current directions, links, CV file |
 | `src/data/news.ts` | the dated `YYYY.MM` news list |
-| `src/data/logos.ts` | the "Previously" row: organisations, oldest first |
-| `src/data/publications.ts` | papers, thumbnails, links, BibTeX |
+| `src/data/logos.ts` | the running "Previously" strip: organisations with `YYYY.MM` dates, oldest first |
+| `src/data/publications.ts` | papers, thumbnails, links; `bibtex` is required on every entry |
 | `src/data/projects.ts` | repositories (star counts are fetched live — see below) |
 
 **Intro and news** take inline markdown — `**bold**`, `*italic*`, `` `code` ``,
 `[text](href)` — and nothing else; the text is escaped first, so data files
 can't inject markup.
 
-**Logos** are written oldest first so the row reads left to right in time.
+**Logos** are written oldest first. The strip runs left to right in time and
+starts over after the newest; it pauses under the pointer and becomes a plain
+wrapping row with reduced motion. Each stop shows the mark, the name and
+`from — to`.
 Each entry uses `img` (a file in `public/logos/`), or `icon` (a brand mark
 from `Icon.astro`, set next to the name), or neither, in which case the name
 is set in the display serif. Marks are drawn in ink and take their own colour
