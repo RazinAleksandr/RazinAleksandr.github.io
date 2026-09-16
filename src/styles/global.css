@@ -1,73 +1,30 @@
 /* ============================================================
    Aleksandr Razin — personal site.
-   Same design language as the LUA project page: paper, ink, one
-   accent; a text serif for headings, the system sans for reading,
-   mono only for dates and dimensions. Light first, dark by
-   preference or by the switch in the sidebar.
+   Bone paper, ink, one cobalt accent. A display serif for the
+   few big words, a plain grotesk for the rest, mono for labels.
+   One theme; the photograph is the only colour on the page.
    ============================================================ */
 
 :root {
-  --paper:       #faf9f7;
-  --card:        #ffffff;
-  --wash:        #f3f0ec;
-  --ink:         #1a1512;
-  --muted:       #6b625c;
-  --faint:       #9a908a;
-  --line:        #e9e3dd;
-  --line-strong: #d3c9c1;
-  --accent:      #c8102e;
-  --accent-deep: #97001f;
-  --accent-wash: rgba(200, 16, 46, .06);
-  --shadow:      0 1px 2px rgba(26, 21, 18, .05), 0 8px 28px rgba(26, 21, 18, .07);
+  --paper:   #f3f0e8;
+  --paper-2: #ebe7dd;
+  --ink:     #111111;
+  --ink-2:   #4a4844;
+  --muted:   #85817a;
+  --line:    #d6d1c4;
+  --line-2:  #bdb7a8;
+  --accent:  #1f3bd6;
 
-  --serif: "STIX Two Text", Georgia, "Times New Roman", serif;
-  --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono:  ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --side: 272px;
-  --measure: 720px;
-  --radius: 10px;
-
-  color-scheme: light;
+  --w: 1120px;
+  --gutter: 24px;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper:       #131010;
-    --card:        #1b1616;
-    --wash:        #1a1514;
-    --ink:         #f1ece8;
-    --muted:       #b3a79f;
-    --faint:       #7d726b;
-    --line:        #322a27;
-    --line-strong: #52453f;
-    --accent:      #ff6b60;
-    --accent-deep: #ffb0a8;
-    --accent-wash: rgba(255, 107, 96, .09);
-    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 10px 32px rgba(0, 0, 0, .45);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper:       #131010;
-  --card:        #1b1616;
-  --wash:        #1a1514;
-  --ink:         #f1ece8;
-  --muted:       #b3a79f;
-  --faint:       #7d726b;
-  --line:        #322a27;
-  --line-strong: #52453f;
-  --accent:      #ff6b60;
-  --accent-deep: #ffb0a8;
-  --accent-wash: rgba(255, 107, 96, .09);
-  --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 10px 32px rgba(0, 0, 0, .45);
-  color-scheme: dark;
-}
-
-/* ---------- base ---------- */
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -77,67 +34,55 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 16px/1.6 var(--sans);
+  font: 400 16px/1.55 var(--sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
+  font-feature-settings: "ss01", "cv11";
 }
 
 img { max-width: 100%; height: auto; display: block; }
 [hidden] { display: none !important; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+h1, h2, h3, p, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; text-underline-offset: 3px; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.wrap { max-width: var(--w); margin-inline: auto; padding-inline: var(--gutter); }
 
-h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0; letter-spacing: -.005em; }
-p { margin: 0; }
-
-.mono {
+/* mono label: the only uppercase on the page */
+.label {
   font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
-}
-
-/* ---------- sections ---------- */
-
-.section { padding-block: 40px; border-top: 1px solid var(--line); }
-.section:first-child { border-top: 0; padding-top: 0; }
-
-.section > h2 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-/* quiet inline links inside body copy */
-.prose a, .quiet a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
-.prose a:hover, .quiet a:hover { color: var(--accent); text-decoration-color: currentColor; }
-
-/* the "arXiv · Code · BibTeX" style link row used under papers and projects */
-.links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }
-.links a { color: var(--accent); }
-.links button {
-  font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer;
-}
-.links button:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-/* a small square tile for organisation marks */
-.tile {
-  width: 32px; height: 32px; flex: none;
-  display: grid; place-items: center;
-  border-radius: 7px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  overflow: hidden;
-}
-.tile svg, .tile img { width: 18px; height: 18px; }
-.tile .mono-mark {
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .02em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
   color: var(--muted);
 }
+.mono { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* display serif */
+.serif { font-family: var(--serif); font-weight: 400; letter-spacing: -.01em; }
+
+/* a section: hairline on top, label in the left column, content on the right */
+.section {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px 48px;
+  padding-block: 40px 56px;
+  border-top: 1px solid var(--line);
+}
+.section > .label { padding-top: 6px; }
+@media (max-width: 800px) {
+  .section { grid-template-columns: 1fr; gap: 18px; padding-block: 32px 40px; }
+}
+
+/* text links */
+.link { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: color .15s, border-color .15s; }
+.link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* "arXiv · Code · BibTeX" rows */
+.links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.links a, .links button { color: var(--accent); }
+.links a:hover, .links button:hover { text-decoration: underline; text-underline-offset: 4px; }

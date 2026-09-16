@@ -2,12 +2,12 @@
 
 Personal site — Astro, static, deployed to GitHub Pages by Actions.
 
-It shares its design language with the [LUA project page](https://razinaleksandr.github.io/latent-upscaling-adapter/):
-paper and ink, one accent, a text serif for headings and the system sans for
-reading. The portrait in the sidebar decodes once on load the way the paper's
-pipeline figure is drawn — a coarse channel-mean latent in the figure's
-diverging colormap, the ×4 latent, then the photograph — and then simply sits
-there. Click it to replay; with reduced motion it is just the photograph.
+Bone paper, ink and one cobalt accent; a display serif for the few big words,
+a plain grotesk for the rest, mono for labels. One theme. The portrait is a
+loop of two states — noise, as a latent before sampling, and the photograph,
+as its decode — drawn in the page's own two tones so the photograph stays the
+only colour on the page. It pauses off-screen and in a hidden tab; with
+reduced motion it is just the photograph.
 
 ## Running it
 
@@ -24,7 +24,7 @@ Node 22+. No other setup.
 
 | Route | What it is |
 | --- | --- |
-| `/` | About, news, experience, publications, projects |
+| `/` | Name, statement, where I've worked (logos), papers, projects, news |
 | `/cv` | The CV as a PDF, embedded, with a download button |
 | `/blog` | Posts from `src/content/blog/` |
 
@@ -34,9 +34,9 @@ All of it is data, not markup — edit these and the page follows:
 
 | File | What it drives |
 | --- | --- |
-| `src/data/profile.ts` | name, role, intro paragraphs, interests, links, CV file |
+| `src/data/profile.ts` | name, role, headline, the two-sentence intro, links, CV file |
 | `src/data/news.ts` | the dated `YYYY.MM` news list |
-| `src/data/experience.ts` | the timeline strip, the role list, education |
+| `src/data/logos.ts` | the "Previously" row: organisations, oldest first |
 | `src/data/publications.ts` | papers, thumbnails, links, BibTeX |
 | `src/data/projects.ts` | repositories (star counts are fetched live — see below) |
 
@@ -44,11 +44,11 @@ All of it is data, not markup — edit these and the page follows:
 `[text](href)` — and nothing else; the text is escaped first, so data files
 can't inject markup.
 
-**Experience** is written oldest first. The strip renders it in that order,
-left to right, so the timeline reads the way time does; the list under it is
-reversed to newest first. Each organisation shows an icon: the SVG named in
-`logo` (from `public/logos/`), or, without one, the `mark` monogram in the
-same tile, so the row stays uniform whether or not a usable logo exists.
+**Logos** are written oldest first so the row reads left to right in time.
+Each entry uses `img` (a file in `public/logos/`), or `icon` (a brand mark
+from `Icon.astro`, set next to the name), or neither, in which case the name
+is set in the display serif. Marks are drawn in ink and take their own colour
+back on hover. The CV carries the roles and dates; the page only says where.
 
 **Paper thumbnails** are paths relative to `public/` (e.g. `pubs/lua.jpg`)
 and get the site's base path at render time, so they work at the domain root
@@ -101,6 +101,8 @@ Content comes from the CV. These were verified independently:
 | *Infrastructures* 2022 | DOI `10.3390/infrastructures7060075` |
 | Dr. Jinjin Gu at INSAIT | [insait.ai/dr-jinjin-gu](https://insait.ai/dr-jinjin-gu/) |
 
-Company marks for Huawei and TradingView are from
-[simple-icons](https://github.com/simple-icons/simple-icons) (CC0); the others
-are monograms.
+Marks for Huawei and TradingView are from
+[simple-icons](https://github.com/simple-icons/simple-icons) (CC0). The ITMO
+wordmark is the university's own, recoloured to ink; the INSAIT wordmark is
+the institute's own. Mining University has no logo file here yet — drop one
+into `public/logos/` and point `img` at it.

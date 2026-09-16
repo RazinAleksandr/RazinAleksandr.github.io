@@ -8,41 +8,33 @@ const pdf = `${base}${profile.cv.file}`.replace(/\/{2,}/g, "/");
 ---
 
 <Base current="cv" title={`CV — ${profile.name}`} description={`Curriculum vitae of ${profile.name} (PDF).`}>
-  <section class="section" id="cv">
+  <section class="page">
     <div class="head">
-      <h2>Curriculum vitae</h2>
-      <a class="dl" href={pdf} download><Icon name="download" size={15} /> Download PDF</a>
+      <h1 class="serif">Curriculum vitae</h1>
+      <div class="side">
+        <span class="mono">Updated {profile.cv.updated}</span>
+        <a class="dl" href={pdf} download><Icon name="download" size={14} /> Download PDF</a>
+      </div>
     </div>
-    <p class="upd mono">Updated {profile.cv.updated}</p>
-
     <object class="pdf" data={`${pdf}#view=FitH`} type="application/pdf" aria-label="CV as PDF">
-      <p class="fallback">
-        Your browser does not preview PDFs here.
-        <a href={pdf} target="_blank" rel="noopener">Open the CV</a> in a new tab.
-      </p>
+      <p class="fallback">Your browser does not preview PDFs here — <a class="link" href={pdf} target="_blank" rel="noopener">open the CV</a> in a new tab.</p>
     </object>
   </section>
 </Base>
 
 <style>
-  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .head h2 { margin: 0; }
+  .page { padding-block: 40px 56px; }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1; letter-spacing: -.02em; }
+  .side { display: flex; align-items: center; gap: 18px; }
   .dl {
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 600;
+    font-size: 14px; font-weight: 500;
     color: var(--paper); background: var(--ink);
-    padding: 8px 14px; border-radius: 999px;
+    padding: 9px 16px; border-radius: 999px;
+    transition: background .15s;
   }
-  .dl:hover { text-decoration: none; background: var(--accent); }
-  .upd { margin-top: 6px; }
-  .pdf {
-    display: block;
-    width: 100%;
-    height: min(1100px, calc(100vh - 160px));
-    margin-top: 20px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--card);
-  }
-  .fallback { padding: 24px; color: var(--muted); font-size: 15px; }
+  .dl:hover { background: var(--accent); }
+  .pdf { display: block; width: 100%; height: min(1100px, calc(100vh - 200px)); border: 1px solid var(--line); background: #fff; }
+  .fallback { padding: 24px; color: var(--ink-2); }
 </style>

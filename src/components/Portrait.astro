@@ -1,10 +1,12 @@
 ---
 /**
- * The portrait, decoded the way the LUA pipeline figure is drawn: a coarse
- * channel-mean latent in the paper's diverging colormap, the ×4 latent, then
- * one decode into the photograph. It plays once, quietly, and settles. There
- * are no captions or controls — it is the same photograph either way — and
- * with reduced motion the photograph is simply there.
+ * The portrait as a loop of two states: noise, as a latent before sampling,
+ * and the photograph, as its decode. The noise is drawn in the paper's own
+ * two tones so it belongs to the page; the photograph is the only colour.
+ *
+ * Noise (hold) → denoise → photograph (hold) → back to noise, about seven
+ * seconds a loop. It pauses off-screen and in a hidden tab, and with reduced
+ * motion the photograph is simply there.
  */
 interface Props { src: string; alt: string }
 const { src, alt } = Astro.props;
@@ -19,10 +21,8 @@ const { src, alt } = Astro.props;
   .portrait {
     position: relative;
     aspect-ratio: 1;
-    border-radius: var(--radius);
     overflow: hidden;
-    background: var(--wash);
-    border: 1px solid var(--line);
+    background: var(--paper-2);
   }
   .portrait img, .portrait canvas {
     position: absolute; inset: 0;
@@ -36,114 +36,107 @@ const { src, alt } = Astro.props;
   const box = document.getElementById("portrait");
   const img = document.getElementById("portraitImg") as HTMLImageElement | null;
   const cv = document.getElementById("portraitCv") as HTMLCanvasElement | null;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (box && img && cv && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (box && img && cv && !reduced) {
     const ctx = cv.getContext("2d")!;
-    const G1 = 24;        // base latent: 24 blocks across, drawn nearest-neighbour
-    const G2 = G1 * 4;    // the ×4 latent
+    const GRAIN = 2;              // css px per noise cell
+    const INK = [17, 17, 17], PAPER = [243, 240, 232];
 
-    // ink → muted → paper → rose → deep accent, the figure's diverging map,
-    // with the accent held back to the brightest values so a face reads as
-    // paper with red highlights rather than as a red mask
-    const STOPS = [0, 0.4, 0.62, 0.86, 1];
-    const COLS = [[28, 18, 16], [107, 98, 92], [250, 249, 247], [226, 138, 146], [151, 0, 31]];
+    // timeline, ms
+    const NOISE = 1400, DENOISE = 2200, PHOTO = 3000, RENOISE = 700;
+    const LOOP = NOISE + DENOISE + PHOTO + RENOISE;
 
-    const smooth = (v: number) => { v = Math.max(0, Math.min(1, v)); return v * v * (3 - 2 * v); };
+    const ease = (v: number) => { v = Math.max(0, Math.min(1, v)); return v * v * (3 - 2 * v); };
 
-    // A "channel mean" of the photograph at grid size g: luminance, robustly
-    // normalised, pushed through the diverging colormap.
-    function latent(g: number, lo: number, mid: number, hi: number) {
-      const c = document.createElement("canvas");
-      c.width = g; c.height = g;
-      const x = c.getContext("2d", { willReadFrequently: true })!;
-      const s = Math.min(img!.naturalWidth, img!.naturalHeight);
-      x.drawImage(img!, (img!.naturalWidth - s) / 2, (img!.naturalHeight - s) / 2, s, s, 0, 0, g, g);
-      const d = x.getImageData(0, 0, g, g);
-      const p = d.data;
-      for (let i = 0; i < p.length; i += 4) {
-        const L = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
-        let t = L <= mid ? 0.5 * (L - lo) / (mid - lo + 1e-6) : 0.5 + 0.5 * (L - mid) / (hi - mid + 1e-6);
-        t = Math.max(0, Math.min(1, t));
-        let k = 0;
-        while (k < STOPS.length - 2 && t > STOPS[k + 1]) k++;
-        const f = (t - STOPS[k]) / (STOPS[k + 1] - STOPS[k]);
-        p[i]     = COLS[k][0] + (COLS[k + 1][0] - COLS[k][0]) * f;
-        p[i + 1] = COLS[k][1] + (COLS[k + 1][1] - COLS[k][1]) * f;
-        p[i + 2] = COLS[k][2] + (COLS[k + 1][2] - COLS[k][2]) * f;
+    let side = 0;
+    let noise: HTMLCanvasElement | null = null;
+    let nctx: CanvasRenderingContext2D | null = null;
+    let data: ImageData | null = null;
+
+    function size() {
+      const css = box!.clientWidth;
+      if (!css) return false;
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const px = Math.round(css * dpr);
+      if (px !== cv!.width) { cv!.width = px; cv!.height = px; }
+      const n = Math.max(24, Math.round(css / GRAIN));
+      if (n !== side) {
+        side = n;
+        noise = document.createElement("canvas");
+        noise.width = n; noise.height = n;
+        nctx = noise.getContext("2d")!;
+        data = nctx.createImageData(n, n);
       }
-      x.putImageData(d, 0, 0);
-      return c;
+      return true;
     }
 
-    function quantiles() {
-      const g = 64;
-      const c = document.createElement("canvas");
-      c.width = g; c.height = g;
-      const x = c.getContext("2d", { willReadFrequently: true })!;
-      x.drawImage(img!, 0, 0, g, g);
-      const p = x.getImageData(0, 0, g, g).data;
-      const L: number[] = [];
-      for (let i = 0; i < p.length; i += 4) L.push(0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]);
-      L.sort((a, b) => a - b);
-      const q = (f: number) => L[Math.floor(f * (L.length - 1))];
-      return [q(0.01), q(0.5), q(0.99)];
+    // Gaussian-ish grey noise between ink and paper — three uniforms summed,
+    // which is enough bell for the eye.
+    function drawNoise() {
+      const p = data!.data;
+      for (let i = 0; i < p.length; i += 4) {
+        const t = (Math.random() + Math.random() + Math.random()) / 3;
+        p[i]     = INK[0] + (PAPER[0] - INK[0]) * t;
+        p[i + 1] = INK[1] + (PAPER[1] - INK[1]) * t;
+        p[i + 2] = INK[2] + (PAPER[2] - INK[2]) * t;
+        p[i + 3] = 255;
+      }
+      nctx!.putImageData(data!, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(noise!, 0, 0, cv!.width, cv!.height);
     }
 
     let raf = 0;
-    function run() {
-      cancelAnimationFrame(raf);
-      const [lo, mid, hi] = quantiles();
-      const base = latent(G1, lo, mid, hi);
-      const up = latent(G2, lo, mid, hi);
+    let t0 = 0;
+    let running = false;
+    let lastNoiseAt = -1;
 
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      const W = Math.round(box!.clientWidth * dpr);
-      cv!.width = W; cv!.height = W;
+    function frame(now: number) {
+      if (!running) return;
+      if (!size()) { raf = requestAnimationFrame(frame); return; }
+      const t = (now - t0) % LOOP;
 
-      // timeline in ms — three stages, a short hold between each
-      const T1 = [0, 700], T2 = [950, 1650], T3 = [1900, 2700];
-      const t0 = performance.now();
-      cv!.style.opacity = "1";
-      img!.style.filter = "";
+      let noiseA = 0, photoBlur = 0, photoA = 1;
+      if (t < NOISE) {
+        noiseA = 1; photoA = 0;
+      } else if (t < NOISE + DENOISE) {
+        const p = ease((t - NOISE) / DENOISE);
+        noiseA = 1 - ease(Math.min(1, p * 1.25));
+        photoA = ease(Math.min(1, p * 1.6));
+        photoBlur = (1 - p) * 22;
+      } else if (t < NOISE + DENOISE + PHOTO) {
+        noiseA = 0; photoA = 1;
+      } else {
+        const p = ease((t - NOISE - DENOISE - PHOTO) / RENOISE);
+        noiseA = p; photoA = 1; photoBlur = p * 10;
+      }
 
-      const frame = (now: number) => {
-        const t = now - t0;
-        ctx.clearRect(0, 0, W, W);
+      // the grain flickers at ~24 fps, not 60 — calmer, and cheaper
+      if (noiseA > 0 && now - lastNoiseAt > 40) { drawNoise(); lastNoiseAt = now; }
+      cv!.style.opacity = noiseA.toFixed(3);
+      img!.style.opacity = photoA.toFixed(3);
+      img!.style.filter = photoBlur > 0.3 ? `blur(${photoBlur.toFixed(1)}px)` : "";
 
-        if (t < T2[0]) {
-          // base latent focuses in
-          const p = smooth((t - T1[0]) / (T1[1] - T1[0]));
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(base, 0, 0, W, W);
-          cv!.style.filter = `blur(${(1 - p) * 10}px)`;
-        } else if (t < T3[0]) {
-          // the ×4 latent resolves over the blocky one
-          const p = smooth((t - T2[0]) / (T2[1] - T2[0]));
-          cv!.style.filter = "";
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(base, 0, 0, W, W);
-          ctx.imageSmoothingEnabled = true;
-          ctx.globalAlpha = p;
-          ctx.drawImage(up, 0, 0, W, W);
-          ctx.globalAlpha = 1;
-        } else {
-          // decode: the latent gives way to the photograph as it comes into focus
-          const p = smooth((t - T3[0]) / (T3[1] - T3[0]));
-          ctx.imageSmoothingEnabled = true;
-          ctx.drawImage(up, 0, 0, W, W);
-          cv!.style.opacity = String(1 - Math.min(1, p * 1.6));
-          img!.style.filter = p < 1 ? `blur(${(1 - p) * 12}px)` : "";
-        }
-
-        if (t < T3[1]) raf = requestAnimationFrame(frame);
-        else { cv!.style.opacity = "0"; cv!.style.filter = ""; img!.style.filter = ""; }
-      };
       raf = requestAnimationFrame(frame);
     }
 
-    // replay on click — quietly, no control drawn for it
-    box.addEventListener("click", run);
-    if (img.complete && img.naturalWidth) run();
-    else img.addEventListener("load", run, { once: true });
+    function start() {
+      if (running) return;
+      running = true;
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+      cv!.style.opacity = "0";
+      img!.style.opacity = "1";
+      img!.style.filter = "";
+    }
+
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? start() : stop()), { threshold: 0.2 });
+    io.observe(box);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
   }
 </script>
