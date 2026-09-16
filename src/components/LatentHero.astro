@@ -1,0 +1,362 @@
+---
+/**
+ * The hero runs the portrait through the LUA pipeline: a noisy channel-mean
+ * latent, the ×4 upscaled latent, then one decode to RGB — the same three
+ * stages as the paper's pipeline figure, with the same mono captions.
+ *
+ * It plays once on load and rests on `decoded`. Every stage stays reachable:
+ * click the rail to jump, click the image to replay.
+ */
+import { profile, type IntroSpan } from "../data/profile";
+
+const base = import.meta.env.BASE_URL;
+const portrait = `${base}portrait-900.jpg`.replace(/\/{2,}/g, "/");
+
+const STAGES = [
+  { key: "latent", label: "latent", caption: "16 × 128 × 128 · channel mean" },
+  { key: "up", label: "latent ×4", caption: "16 × 512 × 512 · channel mean" },
+  { key: "rgb", label: "decoded", caption: "1024 × 1024 RGB" },
+];
+---
+
+<section class="hero wrap">
+  <figure class="stage">
+    <div class="frame" id="latentFrame" role="img"
+         aria-label="Portrait of Aleksandr Razin, rendered as a diffusion latent and decoded to RGB. Click to replay.">
+      <img src={portrait} alt="" id="latentSrc" fetchpriority="high" />
+      <canvas id="latentCv" aria-hidden="true"></canvas>
+      <button class="replay" id="replayBtn" type="button" aria-label="Replay the decode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" />
+        </svg>
+      </button>
+    </div>
+
+    <figcaption class="cap">
+      <span class="mono" id="latentCap">{STAGES[0].caption}</span>
+    </figcaption>
+
+    <div class="rail" role="tablist" aria-label="Pipeline stage">
+      {STAGES.map((s, i) => (
+        <>
+          {i > 0 && <span class="arrow" aria-hidden="true">→</span>}
+          <button class="step" type="button" role="tab" data-stage={i}
+                  aria-selected={i === 0 ? "true" : "false"}>{s.label}</button>
+        </>
+      ))}
+    </div>
+  </figure>
+
+  <div class="bio">
+    <p class="eyebrow mono">{profile.role} · {profile.org}</p>
+    <h1 class="name">
+      {profile.first}<span class="sur">{profile.last}</span>
+    </h1>
+
+    {profile.intro.map((para) => (
+      <p class="lead">
+        {(para as readonly IntroSpan[]).map((span) =>
+          typeof span === "string" ? (
+            span
+          ) : span.href ? (
+            <a class={`chip tone-${span.tone}`} href={span.href}
+               target="_blank" rel="noopener">{span.chip}</a>
+          ) : (
+            <span class={`chip tone-${span.tone}`}>{span.chip}</span>
+          )
+        )}
+      </p>
+    ))}
+
+    <div class="linkrow">
+      <a href={profile.links.github} target="_blank" rel="noopener">GitHub</a>
+      <a href={profile.links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+      <a href={profile.links.scholar} target="_blank" rel="noopener">Scholar</a>
+      <a href={`mailto:${profile.email}`}>Email</a>
+      <a href={profile.links.card} target="_blank" rel="noopener">Visit card</a>
+    </div>
+
+    <p class="where mono">{profile.location}</p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-block: 40px 30px;
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .hero { grid-template-columns: 320px minmax(0, 1fr); gap: 42px; }
+  }
+
+  .stage { margin: 0; display: grid; gap: 10px; justify-items: start; }
+
+  .frame {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--surface-2);
+    cursor: pointer;
+  }
+  .frame img,
+  .frame canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .frame canvas { z-index: 1; }
+
+  .replay {
+    position: absolute;
+    z-index: 3;
+    right: 8px;
+    bottom: 8px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--ink) 26%, transparent);
+    background: color-mix(in srgb, var(--ground) 62%, transparent);
+    color: var(--ink);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .18s ease;
+    backdrop-filter: blur(4px);
+  }
+  .frame:hover .replay,
+  .replay:focus-visible { opacity: 1; }
+  .replay svg { width: 14px; height: 14px; }
+
+  .cap { margin: 0; }
+  .cap .mono { text-transform: none; letter-spacing: .06em; font-size: 10.5px; }
+
+  .rail {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .step {
+    font-family: var(--font-m);
+    font-size: 10px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .step:hover { color: var(--ink-2); }
+  .step[aria-selected="true"] {
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .arrow { color: var(--ink-3); font-size: 12px; }
+
+  .eyebrow { margin: 0 0 8px; color: var(--accent); }
+
+  .name {
+    font-family: var(--font-d);
+    font-variation-settings: "wdth" 118, "wght" 780;
+    font-size: clamp(38px, 9vw, 62px);
+    line-height: .92;
+    letter-spacing: -.025em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+  .name .sur { display: block; color: var(--accent); }
+
+  .bio .lead + .lead { margin-top: 12px; }
+  .bio .linkrow { margin-top: 20px; }
+  .where { margin: 12px 0 0; }
+</style>
+
+<script>
+  const frame = document.getElementById("latentFrame") as HTMLElement | null;
+  const img = document.getElementById("latentSrc") as HTMLImageElement | null;
+  const cv = document.getElementById("latentCv") as HTMLCanvasElement | null;
+  const capEl = document.getElementById("latentCap");
+  const replayBtn = document.getElementById("replayBtn");
+  const steps = Array.from(document.querySelectorAll<HTMLButtonElement>(".step"));
+
+  if (frame && img && cv) {
+    const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const CAPTIONS = [
+      "16 × 128 × 128 · channel mean",
+      "16 × 512 × 512 · channel mean",
+      "1024 × 1024 RGB",
+    ];
+    // grid = latent side length we quantise to; noise = perturbation;
+    // fc = how far toward the false-colour channel-mean look
+    const STAGE = [
+      { grid: 22, noise: 0.62, fc: 1 },
+      { grid: 88, noise: 0.14, fc: 1 },
+      { grid: 0, noise: 0, fc: 0 },
+    ];
+
+    const lo = document.createElement("canvas");
+    const loCtx = lo.getContext("2d", { willReadFrequently: true })!;
+    const ctx = cv.getContext("2d")!;
+
+    let cur = { grid: 22, noise: 0.62, fc: 1 };
+    let raf = 0;
+    let stage = 0;
+
+    function size() {
+      const dpr = Math.min(devicePixelRatio || 1, 2.5);
+      const w = frame!.clientWidth;
+      const h = frame!.clientHeight;
+      if (!w || !h) return false;
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      if (cv!.width !== pw || cv!.height !== ph) { cv!.width = pw; cv!.height = ph; }
+      return true;
+    }
+
+    function cover(c: CanvasRenderingContext2D, W: number, H: number) {
+      const s = Math.max(W / img!.naturalWidth, H / img!.naturalHeight);
+      const dw = img!.naturalWidth * s;
+      const dh = img!.naturalHeight * s;
+      c.drawImage(img!, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    }
+
+    function render() {
+      if (!img!.complete || !img!.naturalWidth || !size()) return;
+      const W = cv!.width;
+      const H = cv!.height;
+
+      // fully decoded — just the photograph
+      if (cur.fc < 0.004 && cur.grid < 1) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.clearRect(0, 0, W, H);
+        cover(ctx, W, H);
+        return;
+      }
+
+      const g = Math.max(6, Math.round(cur.grid || 220));
+      const gh = g;
+      if (lo.width !== g || lo.height !== gh) { lo.width = g; lo.height = gh; }
+      loCtx.imageSmoothingEnabled = true;
+      cover(loCtx, g, gh);
+
+      // Channel-mean false colour: desaturate toward grey, lift contrast, push
+      // what saturation is left toward red, then quantise — the look of a
+      // latent visualised as a mean over channels.
+      const d = loCtx.getImageData(0, 0, g, gh);
+      const px = d.data;
+      const fc = cur.fc;
+      const amp = cur.noise * 150;
+      // hard quantisation while it reads as a latent, easing off as it decodes
+      const levels = 6 + (1 - fc) * 44;
+      const clamp = (v: number) => (v < 0 ? 0 : v > 255 ? 255 : v);
+      for (let i = 0; i < px.length; i += 4) {
+        let r = px[i], gg = px[i + 1], b = px[i + 2];
+        if (fc > 0) {
+          const L = 0.299 * r + 0.587 * gg + 0.114 * b;
+          // punchy grey base, the way a channel mean plots
+          const Lc = clamp((L - 128) * 1.55 + 142);
+          // how warm the pixel is, in [-1, 1] — this is what survives as red
+          const warm = Math.max(-1, Math.min(1, (r - (gg + b) / 2) / 58));
+          // enough red to read as a channel mean, not so much that a face
+          // looks injured — skin is warm, and this runs over a portrait
+          const tr = clamp(Lc + warm * 46);
+          const tg = clamp(Lc - warm * 30);
+          const tb = clamp(Lc - warm * 24);
+          r += (tr - r) * fc;
+          gg += (tg - gg) * fc;
+          b += (tb - b) * fc;
+          const q = 255 / levels;
+          r = Math.round(r / q) * q;
+          gg = Math.round(gg / q) * q;
+          b = Math.round(b / q) * q;
+        }
+        if (amp > 0.5) {
+          const n = (Math.random() - 0.5) * amp;
+          r += n; gg += n; b += n;
+        }
+        px[i] = r; px[i + 1] = gg; px[i + 2] = b;
+      }
+      loCtx.putImageData(d, 0, 0);
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(lo, 0, 0, g, gh, 0, 0, W, H);
+    }
+
+    function paintStage(i: number) {
+      stage = i;
+      capEl!.textContent = CAPTIONS[i];
+      steps.forEach((b, k) => b.setAttribute("aria-selected", k === i ? "true" : "false"));
+    }
+
+    function tween(to: typeof cur, ms: number, done?: () => void) {
+      if (REDUCED) { cur = { ...to }; render(); done?.(); return; }
+      const from = { ...cur };
+      const t0 = performance.now();
+      cancelAnimationFrame(raf);
+      const frameStep = (t: number) => {
+        const p = Math.min(1, (t - t0) / ms);
+        const e = 1 - Math.pow(1 - p, 3);
+        // interpolate the grid geometrically so the jump reads as a zoom
+        cur.grid = from.grid <= 0 || to.grid <= 0
+          ? from.grid + (to.grid - from.grid) * e
+          : Math.exp(Math.log(from.grid) + (Math.log(to.grid) - Math.log(from.grid)) * e);
+        cur.noise = from.noise + (to.noise - from.noise) * e;
+        cur.fc = from.fc + (to.fc - from.fc) * e;
+        render();
+        if (p < 1) raf = requestAnimationFrame(frameStep);
+        else { cur = { ...to }; render(); done?.(); }
+      };
+      raf = requestAnimationFrame(frameStep);
+    }
+
+    function goTo(i: number, ms = 620) {
+      paintStage(i);
+      tween(STAGE[i] as typeof cur, ms);
+    }
+
+    function run() {
+      cur = { ...(STAGE[0] as typeof cur) };
+      paintStage(0);
+      render();
+      if (REDUCED) { goTo(2, 0); return; }
+      setTimeout(() => {
+        paintStage(1);
+        tween(STAGE[1] as typeof cur, 620, () => {
+          setTimeout(() => {
+            paintStage(2);
+            tween(STAGE[2] as typeof cur, 720);
+          }, 520);
+        });
+      }, 620);
+    }
+
+    steps.forEach((b, i) =>
+      b.addEventListener("click", (e) => { e.stopPropagation(); goTo(i); })
+    );
+    replayBtn?.addEventListener("click", (e) => { e.stopPropagation(); run(); });
+    frame.addEventListener("click", () => { if (stage === 2) run(); else goTo(2); });
+    addEventListener("resize", render, { passive: true });
+
+    if (img.complete && img.naturalWidth) run();
+    else img.addEventListener("load", run);
+  }
+</script>

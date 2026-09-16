@@ -1,0 +1,57 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main, astro-site]
+  workflow_dispatch:
+
+# the publish action commits the built site to the gh-pages branch
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # On a working branch this publishes to gh-pages/next, so it is live at
+      # /next/ while the old site keeps the root. On main it takes the root.
+      # Promoting the branch therefore needs no edit here.
+      - name: Work out where this deploys
+        id: t
+        run: |
+          if [[ "$GITHUB_REF_NAME" == "main" ]]; then
+            echo "base=/"      >> "$GITHUB_OUTPUT"
+            echo "folder="     >> "$GITHUB_OUTPUT"
+          else
+            echo "base=/next/" >> "$GITHUB_OUTPUT"
+            echo "folder=next" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Branch $GITHUB_REF_NAME -> base $(grep base "$GITHUB_OUTPUT")"
+
+      - name: Build
+        run: npm run build
+        env:
+          BASE_PATH: ${{ steps.t.outputs.base }}
+
+      # Same action the Jekyll site already uses, so Pages stays in branch mode
+      # and the existing deployment is untouched.
+      - name: Publish
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist
+          target-folder: ${{ steps.t.outputs.folder }}
+          commit-message: "Deploy Astro site from @ ${{ github.sha }}"

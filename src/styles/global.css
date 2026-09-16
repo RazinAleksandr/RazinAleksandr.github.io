@@ -1,0 +1,226 @@
+/* ============================================================
+   Aleksandr Razin — personal site
+   Palette sourced from a real X-Rite ColorChecker target, carried
+   over from the visit card so both read as one identity.
+   Dark-first: bare :root is the darkroom theme.
+   ============================================================ */
+
+:root {
+  --ground:    #0E1113;
+  --ground-2:  #141819;
+  --surface:   #181D20;
+  --surface-2: #1E2429;
+  --rule:      #2B3238;
+  --rule-soft: #1F262B;
+  --ink:       #EDEBE5;
+  --ink-2:     #A7AEB3;
+  --ink-3:     #6B7379;
+  --accent:    #E0A32E;
+  --accent-ink:#0E1113;
+  --grain:     0.055;
+
+  /* ColorChecker patches — identical in both themes: they are the reference */
+  --p-cyan:    #0885A1;
+  --p-oryel:   #E0A32E;
+  --p-red:     #AF363C;
+  --p-green:   #469449;
+  --p-blue:    #4750A8;
+  --p-magenta: #BB5695;
+
+  --font-d: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-m: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --w: 960px;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 6px;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground:    #DCDAD3;
+    --ground-2:  #E6E4DD;
+    --surface:   #F2F1ED;
+    --surface-2: #FAF9F6;
+    --rule:      #C3C1B8;
+    --rule-soft: #D4D2C9;
+    --ink:       #14171A;
+    --ink-2:     #4B5155;
+    --ink-3:     #787E82;
+    --accent:    #A56A12;
+    --accent-ink:#FFFFFF;
+    --grain:     0.05;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --ground:    #DCDAD3;
+  --ground-2:  #E6E4DD;
+  --surface:   #F2F1ED;
+  --surface-2: #FAF9F6;
+  --rule:      #C3C1B8;
+  --rule-soft: #D4D2C9;
+  --ink:       #14171A;
+  --ink-2:     #4B5155;
+  --ink-3:     #787E82;
+  --accent:    #A56A12;
+  --accent-ink:#FFFFFF;
+  --grain:     0.05;
+  color-scheme: light;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+img, canvas { max-width: 100%; }
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-d);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* photographic grain — static, costs nothing to repaint */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* ---------- layout ---------- */
+
+.wrap {
+  max-width: var(--w);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.section { padding-block: 54px; }
+.section + .section { padding-top: 0; }
+
+/* Centred section header with rules either side */
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 26px;
+  font-family: var(--font-d);
+  font-variation-settings: "wdth" 116, "wght" 720;
+  font-size: clamp(22px, 4.4vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+.sec-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rule), transparent);
+}
+.sec-title .idx {
+  font-family: var(--font-m);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--accent);
+  align-self: flex-start;
+  padding-top: 6px;
+}
+
+.mono {
+  font-family: var(--font-m);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.lead { font-size: 17px; line-height: 1.65; color: var(--ink-2); max-width: 68ch; }
+.lead strong, .lead b { color: var(--ink); font-weight: 600; }
+
+/* ---------- entity chip ---------- */
+/* Inline highlight on an organisation, person or venue. */
+
+.chip {
+  display: inline;
+  padding: 1px 6px;
+  margin-inline: 1px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--c, var(--accent)) 24%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 46%, transparent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+a.chip:hover { background: color-mix(in srgb, var(--c, var(--accent)) 40%, transparent); }
+
+.tone-cyan    { --c: var(--p-cyan); }
+.tone-oryel   { --c: var(--p-oryel); }
+.tone-red     { --c: var(--p-red); }
+.tone-green   { --c: var(--p-green); }
+.tone-blue    { --c: var(--p-blue); }
+.tone-magenta { --c: var(--p-magenta); }
+.tone-accent  { --c: var(--accent); }
+
+/* ---------- small shared bits ---------- */
+
+.pill {
+  display: inline-block;
+  font-family: var(--font-m);
+  font-size: 9.5px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--c, var(--accent)) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 48%, transparent);
+  white-space: nowrap;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-md);
+}
+
+.linkrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.linkrow a {
+  font-family: var(--font-m);
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-decoration: none;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
+.linkrow a:hover { color: var(--ink); border-color: var(--accent); }

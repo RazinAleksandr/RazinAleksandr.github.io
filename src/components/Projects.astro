@@ -1,0 +1,120 @@
+---
+/**
+ * Selected repositories. Star counts come from the GitHub API at build time
+ * and fall back to the snapshot in projects.ts when the API is unavailable.
+ */
+import { projects } from "../data/projects";
+import { liveStars } from "../lib/stars";
+
+const stars = await liveStars();
+const owner = (p: (typeof projects)[number]) => p.owner ?? "RazinAleksandr";
+const withStars = projects.map((p) => ({
+  ...p,
+  url: p.href ?? `https://github.com/${owner(p)}/${p.repo}`,
+  // only trust the live count for repos on the account we fetched
+  count: p.owner ? p.stars : (stars[p.repo] ?? p.stars),
+}));
+
+const featured = withStars.filter((p) => p.featured);
+const rest = withStars.filter((p) => !p.featured);
+---
+
+<section class="section" id="projects">
+  <h2 class="sec-title"><span class="idx">04</span> Projects</h2>
+
+  {featured.map((p) => (
+    <a class={`proj feat card tone-${p.tone}`} href={p.url} target="_blank" rel="noopener">
+      <div class="head">
+        <span class="bead" aria-hidden="true" />
+        <span class="name">{p.name}</span>
+        <span class="lang mono">{p.lang}</span>
+        {p.count > 0 && <span class="stars mono">★ {p.count}</span>}
+      </div>
+      <p class="blurb">{p.blurb}</p>
+      <span class="repo mono">{owner(p)}/{p.repo}</span>
+    </a>
+  ))}
+
+  <div class="grid">
+    {rest.map((p) => (
+      <a class={`proj card tone-${p.tone}`} href={p.url} target="_blank" rel="noopener">
+        <div class="head">
+          <span class="bead" aria-hidden="true" />
+          <span class="name">{p.name}</span>
+          {p.count > 0 && <span class="stars mono">★ {p.count}</span>}
+        </div>
+        <p class="blurb">{p.blurb}</p>
+        <span class="lang mono">{p.lang}</span>
+      </a>
+    ))}
+  </div>
+
+  <p class="more">
+    <a href="https://github.com/RazinAleksandr?tab=repositories" target="_blank" rel="noopener">
+      All repositories on GitHub →
+    </a>
+  </p>
+</section>
+
+<style>
+  .proj {
+    display: block;
+    text-decoration: none;
+    padding: 15px 16px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .proj:hover {
+    border-color: color-mix(in srgb, var(--c, var(--accent)) 60%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .feat { margin-bottom: 12px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+  }
+
+  .head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .bead {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--c, var(--accent));
+    flex: none;
+  }
+  .name {
+    font-size: 16px;
+    font-variation-settings: "wdth" 108, "wght" 680;
+    line-height: 1.2;
+  }
+  .feat .name { font-size: 19px; }
+
+  .lang, .stars {
+    font-size: 10px;
+    letter-spacing: .07em;
+    text-transform: none;
+  }
+  .stars { color: var(--accent); margin-left: auto; }
+
+  .blurb {
+    margin: 9px 0 10px;
+    font-size: 13.8px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .feat .blurb { font-size: 14.5px; }
+
+  .repo { font-size: 10px; letter-spacing: .05em; text-transform: none; }
+
+  .more { margin: 18px 0 0; }
+  .more a {
+    font-family: var(--font-m);
+    font-size: 12px;
+    letter-spacing: .05em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .more a:hover { text-decoration: underline; }
+</style>

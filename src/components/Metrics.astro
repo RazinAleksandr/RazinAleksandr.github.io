@@ -1,0 +1,56 @@
+---
+/**
+ * The ColorChecker strip: six real patches (12–18) carrying the six numbers
+ * worth leading with. Deliberately not a citation chart — these are where the
+ * record is strongest.
+ */
+import { profile } from "../data/profile";
+---
+
+<section class="chart" aria-label="Selected numbers">
+  {profile.metrics.map((m) => (
+    <div class={`patch tone-${m.tone}`}>
+      <div class="swatch" />
+      <div class="v">{m.value}</div>
+      <div class="k">{m.label}</div>
+      <div class="s mono">{m.sub}</div>
+    </div>
+  ))}
+</section>
+
+<style>
+  .chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    gap: 8px;
+  }
+  .patch {
+    background: var(--surface);
+    border: 1px solid var(--rule-soft);
+    border-radius: var(--r-sm);
+    padding: 12px 12px 11px;
+    min-width: 0;
+  }
+  .swatch {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--c, var(--accent));
+    margin-bottom: 11px;
+  }
+  .v {
+    font-family: var(--font-d);
+    font-variation-settings: "wdth" 112, "wght" 720;
+    font-size: 23px;
+    line-height: 1;
+    letter-spacing: -.015em;
+    font-variant-numeric: tabular-nums;
+  }
+  .k { margin-top: 7px; font-size: 13px; line-height: 1.3; color: var(--ink-2); }
+  .s {
+    margin-top: 7px;
+    font-size: 9px;
+    letter-spacing: .06em;
+    text-transform: none;
+    color: var(--ink-3);
+  }
+</style>
