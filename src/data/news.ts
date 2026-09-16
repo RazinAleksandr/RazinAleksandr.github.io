@@ -8,20 +8,16 @@
 export type NewsItem = {
   date: string;
   body: string;
-  /** Marks the handful worth pulling the eye to. Use sparingly. */
-  highlight?: boolean;
 };
 
 export const news: NewsItem[] = [
   {
     date: "2026.09",
     body: "Started as a Research Scientist at **INSAIT** in Sofia, working on generative vision and image restoration with Dr. Jinjin Gu through the ELLIS programme.",
-    highlight: true,
   },
   {
     date: "2026",
     body: "**LUA** — *One Small Step in Latent, One Giant Leap for Pixels* — accepted at **ECCV 2026**, Malmö. First and corresponding author.",
-    highlight: true,
   },
   {
     date: "2026",
@@ -30,7 +26,6 @@ export const news: NewsItem[] = [
   {
     date: "2025.11",
     body: "LUA preprint released as [arXiv:2511.10629](https://arxiv.org/abs/2511.10629) and ranked **#1 Hugging Face Daily Paper** with 133 upvotes.",
-    highlight: true,
   },
   {
     date: "2025.09",

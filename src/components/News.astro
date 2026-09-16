@@ -1,63 +1,29 @@
 ---
-/**
- * Dated news in the academic `YYYY.MM` convention, newest first.
- * Everything is visible at once — no scroll box, no "show more": the list is
- * short enough that hiding half of it would only cost a click.
- */
 import { news } from "../data/news";
 import { inlineMd } from "../lib/inline";
 ---
 
 <section class="section" id="news">
-  <h2 class="sec-title"><span class="idx">01</span> News</h2>
-
-  <ol class="news">
+  <h2>News</h2>
+  <ul class="news">
     {news.map((n) => (
-      <li class:list={["item", n.highlight && "hot"]}>
+      <li>
         <span class="date mono">{n.date}</span>
         <span class="body" set:html={inlineMd(n.body)} />
       </li>
     ))}
-  </ol>
+  </ul>
 </section>
 
 <style>
-  .news {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 2px;
-  }
-  .item {
-    display: grid;
-    grid-template-columns: 62px minmax(0, 1fr);
-    gap: 16px;
-    padding: 11px 0 11px 12px;
-    border-left: 2px solid transparent;
-    border-bottom: 1px solid var(--rule-soft);
-    align-items: baseline;
-  }
-  .item:last-child { border-bottom: 0; }
-  .item.hot { border-left-color: var(--accent); }
-
-  .date {
-    font-size: 11px;
-    letter-spacing: .04em;
-    text-transform: none;
-    color: var(--ink-3);
-    white-space: nowrap;
-  }
-  .item.hot .date { color: var(--accent); }
-
-  .body { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
-  .body :global(strong) { color: var(--ink); font-weight: 600; }
-  .body :global(em) { font-style: italic; }
-  .body :global(a) { color: var(--accent); text-decoration: none; }
-  .body :global(a:hover) { text-decoration: underline; }
-
+  .news { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .news li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: baseline; }
+  .date { white-space: nowrap; }
+  .body { font-size: 15.5px; line-height: 1.55; color: var(--ink); }
+  .body :global(strong) { font-weight: 600; }
+  .body :global(em) { font-family: var(--serif); font-style: italic; }
+  .body :global(a) { color: var(--accent); }
   @media (max-width: 560px) {
-    .item { grid-template-columns: 1fr; gap: 3px; padding-left: 10px; }
-    .body { font-size: 14.5px; }
+    .news li { grid-template-columns: 1fr; gap: 2px; }
   }
 </style>

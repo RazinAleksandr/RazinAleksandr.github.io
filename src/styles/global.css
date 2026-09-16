@@ -1,226 +1,143 @@
 /* ============================================================
-   Aleksandr Razin — personal site
-   Palette sourced from a real X-Rite ColorChecker target, carried
-   over from the visit card so both read as one identity.
-   Dark-first: bare :root is the darkroom theme.
+   Aleksandr Razin — personal site.
+   Same design language as the LUA project page: paper, ink, one
+   accent; a text serif for headings, the system sans for reading,
+   mono only for dates and dimensions. Light first, dark by
+   preference or by the switch in the sidebar.
    ============================================================ */
 
 :root {
-  --ground:    #0E1113;
-  --ground-2:  #141819;
-  --surface:   #181D20;
-  --surface-2: #1E2429;
-  --rule:      #2B3238;
-  --rule-soft: #1F262B;
-  --ink:       #EDEBE5;
-  --ink-2:     #A7AEB3;
-  --ink-3:     #6B7379;
-  --accent:    #E0A32E;
-  --accent-ink:#0E1113;
-  --grain:     0.055;
+  --paper:       #faf9f7;
+  --card:        #ffffff;
+  --wash:        #f3f0ec;
+  --ink:         #1a1512;
+  --muted:       #6b625c;
+  --faint:       #9a908a;
+  --line:        #e9e3dd;
+  --line-strong: #d3c9c1;
+  --accent:      #c8102e;
+  --accent-deep: #97001f;
+  --accent-wash: rgba(200, 16, 46, .06);
+  --shadow:      0 1px 2px rgba(26, 21, 18, .05), 0 8px 28px rgba(26, 21, 18, .07);
 
-  /* ColorChecker patches — identical in both themes: they are the reference */
-  --p-cyan:    #0885A1;
-  --p-oryel:   #E0A32E;
-  --p-red:     #AF363C;
-  --p-green:   #469449;
-  --p-blue:    #4750A8;
-  --p-magenta: #BB5695;
+  --serif: "STIX Two Text", Georgia, "Times New Roman", serif;
+  --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono:  ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
-  --font-d: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-m: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --side: 272px;
+  --measure: 720px;
+  --radius: 10px;
 
-  --w: 960px;
-  --r-lg: 14px;
-  --r-md: 10px;
-  --r-sm: 6px;
+  color-scheme: light;
+}
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:       #131010;
+    --card:        #1b1616;
+    --wash:        #1a1514;
+    --ink:         #f1ece8;
+    --muted:       #b3a79f;
+    --faint:       #7d726b;
+    --line:        #322a27;
+    --line-strong: #52453f;
+    --accent:      #ff6b60;
+    --accent-deep: #ffb0a8;
+    --accent-wash: rgba(255, 107, 96, .09);
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 10px 32px rgba(0, 0, 0, .45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:       #131010;
+  --card:        #1b1616;
+  --wash:        #1a1514;
+  --ink:         #f1ece8;
+  --muted:       #b3a79f;
+  --faint:       #7d726b;
+  --line:        #322a27;
+  --line-strong: #52453f;
+  --accent:      #ff6b60;
+  --accent-deep: #ffb0a8;
+  --accent-wash: rgba(255, 107, 96, .09);
+  --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 10px 32px rgba(0, 0, 0, .45);
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --ground:    #DCDAD3;
-    --ground-2:  #E6E4DD;
-    --surface:   #F2F1ED;
-    --surface-2: #FAF9F6;
-    --rule:      #C3C1B8;
-    --rule-soft: #D4D2C9;
-    --ink:       #14171A;
-    --ink-2:     #4B5155;
-    --ink-3:     #787E82;
-    --accent:    #A56A12;
-    --accent-ink:#FFFFFF;
-    --grain:     0.05;
-    color-scheme: light;
-  }
-}
-:root[data-theme="light"] {
-  --ground:    #DCDAD3;
-  --ground-2:  #E6E4DD;
-  --surface:   #F2F1ED;
-  --surface-2: #FAF9F6;
-  --rule:      #C3C1B8;
-  --rule-soft: #D4D2C9;
-  --ink:       #14171A;
-  --ink-2:     #4B5155;
-  --ink-3:     #787E82;
-  --accent:    #A56A12;
-  --accent-ink:#FFFFFF;
-  --grain:     0.05;
-  color-scheme: light;
-}
-:root[data-theme="dark"] { color-scheme: dark; }
+/* ---------- base ---------- */
 
 *, *::before, *::after { box-sizing: border-box; }
-img, canvas { max-width: 100%; }
-[hidden] { display: none !important; }
-
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
-  }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 
 body {
   margin: 0;
-  background: var(--ground);
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-d);
-  font-size: 16px;
-  line-height: 1.6;
+  font: 400 16px/1.6 var(--sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
-  overflow-x: hidden;
 }
 
-/* photographic grain — static, costs nothing to repaint */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 90;
-  opacity: var(--grain);
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+img { max-width: 100%; height: auto; display: block; }
+[hidden] { display: none !important; }
 
-a { color: inherit; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
-/* ---------- layout ---------- */
-
-.wrap {
-  max-width: var(--w);
-  margin-inline: auto;
-  padding-inline: 20px;
-}
-
-.section { padding-block: 54px; }
-.section + .section { padding-top: 0; }
-
-/* Centred section header with rules either side */
-.sec-title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin: 0 0 26px;
-  font-family: var(--font-d);
-  font-variation-settings: "wdth" 116, "wght" 720;
-  font-size: clamp(22px, 4.4vw, 30px);
-  line-height: 1.1;
-  letter-spacing: -.015em;
-  text-wrap: balance;
-}
-.sec-title::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--rule), transparent);
-}
-.sec-title .idx {
-  font-family: var(--font-m);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .14em;
-  color: var(--accent);
-  align-self: flex-start;
-  padding-top: 6px;
-}
+h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0; letter-spacing: -.005em; }
+p { margin: 0; }
 
 .mono {
-  font-family: var(--font-m);
-  font-size: 11px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
-.lead { font-size: 17px; line-height: 1.65; color: var(--ink-2); max-width: 68ch; }
-.lead strong, .lead b { color: var(--ink); font-weight: 600; }
+/* ---------- sections ---------- */
 
-/* ---------- entity chip ---------- */
-/* Inline highlight on an organisation, person or venue. */
+.section { padding-block: 40px; border-top: 1px solid var(--line); }
+.section:first-child { border-top: 0; padding-top: 0; }
 
-.chip {
-  display: inline;
-  padding: 1px 6px;
-  margin-inline: 1px;
-  border-radius: 4px;
+.section > h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+/* quiet inline links inside body copy */
+.prose a, .quiet a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.prose a:hover, .quiet a:hover { color: var(--accent); text-decoration-color: currentColor; }
+
+/* the "arXiv · Code · BibTeX" style link row used under papers and projects */
+.links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }
+.links a { color: var(--accent); }
+.links button {
+  font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer;
+}
+.links button:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* a small square tile for organisation marks */
+.tile {
+  width: 32px; height: 32px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 7px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  overflow: hidden;
+}
+.tile svg, .tile img { width: 18px; height: 18px; }
+.tile .mono-mark {
+  font-family: var(--serif);
+  font-size: 13px;
   font-weight: 600;
-  color: var(--ink);
-  background: color-mix(in srgb, var(--c, var(--accent)) 24%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 46%, transparent);
-  text-decoration: none;
-  white-space: nowrap;
+  letter-spacing: .02em;
+  color: var(--muted);
 }
-a.chip:hover { background: color-mix(in srgb, var(--c, var(--accent)) 40%, transparent); }
-
-.tone-cyan    { --c: var(--p-cyan); }
-.tone-oryel   { --c: var(--p-oryel); }
-.tone-red     { --c: var(--p-red); }
-.tone-green   { --c: var(--p-green); }
-.tone-blue    { --c: var(--p-blue); }
-.tone-magenta { --c: var(--p-magenta); }
-.tone-accent  { --c: var(--accent); }
-
-/* ---------- small shared bits ---------- */
-
-.pill {
-  display: inline-block;
-  font-family: var(--font-m);
-  font-size: 9.5px;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 999px;
-  color: var(--ink);
-  background: color-mix(in srgb, var(--c, var(--accent)) 20%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 48%, transparent);
-  white-space: nowrap;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--rule-soft);
-  border-radius: var(--r-md);
-}
-
-.linkrow { display: flex; flex-wrap: wrap; gap: 8px; }
-.linkrow a {
-  font-family: var(--font-m);
-  font-size: 11px;
-  letter-spacing: .05em;
-  text-decoration: none;
-  color: var(--ink-2);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  padding: 5px 11px;
-}
-.linkrow a:hover { color: var(--ink); border-color: var(--accent); }

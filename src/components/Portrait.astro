@@ -1,0 +1,149 @@
+---
+/**
+ * The portrait, decoded the way the LUA pipeline figure is drawn: a coarse
+ * channel-mean latent in the paper's diverging colormap, the ×4 latent, then
+ * one decode into the photograph. It plays once, quietly, and settles. There
+ * are no captions or controls — it is the same photograph either way — and
+ * with reduced motion the photograph is simply there.
+ */
+interface Props { src: string; alt: string }
+const { src, alt } = Astro.props;
+---
+
+<div class="portrait" id="portrait">
+  <img src={src} alt={alt} id="portraitImg" width="900" height="900" fetchpriority="high" />
+  <canvas id="portraitCv" aria-hidden="true"></canvas>
+</div>
+
+<style>
+  .portrait {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--wash);
+    border: 1px solid var(--line);
+  }
+  .portrait img, .portrait canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .portrait canvas { opacity: 0; }
+</style>
+
+<script>
+  const box = document.getElementById("portrait");
+  const img = document.getElementById("portraitImg") as HTMLImageElement | null;
+  const cv = document.getElementById("portraitCv") as HTMLCanvasElement | null;
+
+  if (box && img && cv && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const ctx = cv.getContext("2d")!;
+    const G1 = 24;        // base latent: 24 blocks across, drawn nearest-neighbour
+    const G2 = G1 * 4;    // the ×4 latent
+
+    // ink → muted → paper → rose → deep accent, the figure's diverging map,
+    // with the accent held back to the brightest values so a face reads as
+    // paper with red highlights rather than as a red mask
+    const STOPS = [0, 0.4, 0.62, 0.86, 1];
+    const COLS = [[28, 18, 16], [107, 98, 92], [250, 249, 247], [226, 138, 146], [151, 0, 31]];
+
+    const smooth = (v: number) => { v = Math.max(0, Math.min(1, v)); return v * v * (3 - 2 * v); };
+
+    // A "channel mean" of the photograph at grid size g: luminance, robustly
+    // normalised, pushed through the diverging colormap.
+    function latent(g: number, lo: number, mid: number, hi: number) {
+      const c = document.createElement("canvas");
+      c.width = g; c.height = g;
+      const x = c.getContext("2d", { willReadFrequently: true })!;
+      const s = Math.min(img!.naturalWidth, img!.naturalHeight);
+      x.drawImage(img!, (img!.naturalWidth - s) / 2, (img!.naturalHeight - s) / 2, s, s, 0, 0, g, g);
+      const d = x.getImageData(0, 0, g, g);
+      const p = d.data;
+      for (let i = 0; i < p.length; i += 4) {
+        const L = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+        let t = L <= mid ? 0.5 * (L - lo) / (mid - lo + 1e-6) : 0.5 + 0.5 * (L - mid) / (hi - mid + 1e-6);
+        t = Math.max(0, Math.min(1, t));
+        let k = 0;
+        while (k < STOPS.length - 2 && t > STOPS[k + 1]) k++;
+        const f = (t - STOPS[k]) / (STOPS[k + 1] - STOPS[k]);
+        p[i]     = COLS[k][0] + (COLS[k + 1][0] - COLS[k][0]) * f;
+        p[i + 1] = COLS[k][1] + (COLS[k + 1][1] - COLS[k][1]) * f;
+        p[i + 2] = COLS[k][2] + (COLS[k + 1][2] - COLS[k][2]) * f;
+      }
+      x.putImageData(d, 0, 0);
+      return c;
+    }
+
+    function quantiles() {
+      const g = 64;
+      const c = document.createElement("canvas");
+      c.width = g; c.height = g;
+      const x = c.getContext("2d", { willReadFrequently: true })!;
+      x.drawImage(img!, 0, 0, g, g);
+      const p = x.getImageData(0, 0, g, g).data;
+      const L: number[] = [];
+      for (let i = 0; i < p.length; i += 4) L.push(0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]);
+      L.sort((a, b) => a - b);
+      const q = (f: number) => L[Math.floor(f * (L.length - 1))];
+      return [q(0.01), q(0.5), q(0.99)];
+    }
+
+    let raf = 0;
+    function run() {
+      cancelAnimationFrame(raf);
+      const [lo, mid, hi] = quantiles();
+      const base = latent(G1, lo, mid, hi);
+      const up = latent(G2, lo, mid, hi);
+
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const W = Math.round(box!.clientWidth * dpr);
+      cv!.width = W; cv!.height = W;
+
+      // timeline in ms — three stages, a short hold between each
+      const T1 = [0, 700], T2 = [950, 1650], T3 = [1900, 2700];
+      const t0 = performance.now();
+      cv!.style.opacity = "1";
+      img!.style.filter = "";
+
+      const frame = (now: number) => {
+        const t = now - t0;
+        ctx.clearRect(0, 0, W, W);
+
+        if (t < T2[0]) {
+          // base latent focuses in
+          const p = smooth((t - T1[0]) / (T1[1] - T1[0]));
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(base, 0, 0, W, W);
+          cv!.style.filter = `blur(${(1 - p) * 10}px)`;
+        } else if (t < T3[0]) {
+          // the ×4 latent resolves over the blocky one
+          const p = smooth((t - T2[0]) / (T2[1] - T2[0]));
+          cv!.style.filter = "";
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(base, 0, 0, W, W);
+          ctx.imageSmoothingEnabled = true;
+          ctx.globalAlpha = p;
+          ctx.drawImage(up, 0, 0, W, W);
+          ctx.globalAlpha = 1;
+        } else {
+          // decode: the latent gives way to the photograph as it comes into focus
+          const p = smooth((t - T3[0]) / (T3[1] - T3[0]));
+          ctx.imageSmoothingEnabled = true;
+          ctx.drawImage(up, 0, 0, W, W);
+          cv!.style.opacity = String(1 - Math.min(1, p * 1.6));
+          img!.style.filter = p < 1 ? `blur(${(1 - p) * 12}px)` : "";
+        }
+
+        if (t < T3[1]) raf = requestAnimationFrame(frame);
+        else { cv!.style.opacity = "0"; cv!.style.filter = ""; img!.style.filter = ""; }
+      };
+      raf = requestAnimationFrame(frame);
+    }
+
+    // replay on click — quietly, no control drawn for it
+    box.addEventListener("click", run);
+    if (img.complete && img.naturalWidth) run();
+    else img.addEventListener("load", run, { once: true });
+  }
+</script>

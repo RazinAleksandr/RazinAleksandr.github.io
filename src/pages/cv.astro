@@ -1,0 +1,48 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import { profile } from "../data/profile";
+
+const base = import.meta.env.BASE_URL;
+const pdf = `${base}${profile.cv.file}`.replace(/\/{2,}/g, "/");
+---
+
+<Base current="cv" title={`CV — ${profile.name}`} description={`Curriculum vitae of ${profile.name} (PDF).`}>
+  <section class="section" id="cv">
+    <div class="head">
+      <h2>Curriculum vitae</h2>
+      <a class="dl" href={pdf} download><Icon name="download" size={15} /> Download PDF</a>
+    </div>
+    <p class="upd mono">Updated {profile.cv.updated}</p>
+
+    <object class="pdf" data={`${pdf}#view=FitH`} type="application/pdf" aria-label="CV as PDF">
+      <p class="fallback">
+        Your browser does not preview PDFs here.
+        <a href={pdf} target="_blank" rel="noopener">Open the CV</a> in a new tab.
+      </p>
+    </object>
+  </section>
+</Base>
+
+<style>
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .head h2 { margin: 0; }
+  .dl {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600;
+    color: var(--paper); background: var(--ink);
+    padding: 8px 14px; border-radius: 999px;
+  }
+  .dl:hover { text-decoration: none; background: var(--accent); }
+  .upd { margin-top: 6px; }
+  .pdf {
+    display: block;
+    width: 100%;
+    height: min(1100px, calc(100vh - 160px));
+    margin-top: 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+  .fallback { padding: 24px; color: var(--muted); font-size: 15px; }
+</style>

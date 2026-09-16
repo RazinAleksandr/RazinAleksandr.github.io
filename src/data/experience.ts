@@ -1,132 +1,101 @@
 /**
- * Where I've worked. Drives both the logo strip and the timeline.
+ * Where I've worked, oldest first — the timeline reads left to right the way
+ * time does. The list under it is rendered newest first.
  *
- * `mark` is a typographic wordmark rather than a company logo file: it keeps
- * the strip visually consistent and avoids shipping third-party trademarks.
- * Swap in real logos by adding `logo: "/logos/x.svg"` — the component prefers
- * it when present.
+ * `logo` points at an SVG in public/logos/; without one the tile shows `mark`
+ * as a serif monogram, so every organisation gets an icon of the same size.
  */
 
 export type Role = {
   org: string;
+  /** Short name for the timeline strip. */
+  short: string;
   mark: string;
+  logo?: string;
   role: string;
   from: string;
   to: string;
-  where?: string;
-  tone: string;
-  summary: string;
-  /** Concrete outcomes. Keep each one to a single measurable claim. */
-  points: string[];
   href?: string;
-  logo?: string;
+  /** One line. The CV has the bullets. */
+  summary: string;
 };
 
 export const experience: Role[] = [
   {
-    org: "INSAIT",
-    mark: "INSAIT",
-    role: "Research Scientist",
-    from: "2026",
-    to: "now",
-    where: "Sofia, Bulgaria",
-    tone: "green",
-    href: "https://insait.ai/",
-    summary:
-      "Generative vision and image restoration with Dr. Jinjin Gu, through the ELLIS programme.",
-    points: [
-      "Offered a place in the ELLIS programme — top 15% of 6,000+ applicants",
-    ],
-  },
-  {
-    org: "TradingView",
-    mark: "TradingView",
-    role: "Senior ML Engineer",
-    from: "2025",
-    to: "now",
-    tone: "cyan",
-    href: "https://www.tradingview.com/",
-    summary:
-      "The harness and full offline/online evaluation behind an agentic AI copilot for real-time chart analysis — thousands of tools, hundreds of agents.",
-    points: [
-      "2M+ monthly users on the copilot",
-      "Production multimodal search over text, charts and video at ~80% precision per modality",
-      "Cut existing LLM costs ~20% per month by blending third-party APIs with local inference",
-    ],
-  },
-  {
-    org: "Own startup",
-    mark: "Startup",
-    role: "Founder · Lead ML Engineer",
-    from: "2025",
-    to: "2025",
-    tone: "blue",
-    summary:
-      "Founded a retail computer-vision company, hired the team, and sold it inside a year.",
-    points: [
-      "Raised ~€100K and hired a five-engineer product team",
-      "Shipped detection, segmentation and tracking to 3 of the top-5 national retailers, saving ~€20K+/month",
-      "Post-trained text-to-image and image-to-image ad generation, lifting client ad CTR ~15%",
-      "Acquired by a large IT company in 2025",
-    ],
-  },
-  {
-    org: "Huawei Research Institute",
-    mark: "Huawei",
-    role: "AI Researcher",
-    from: "2023",
-    to: "2025",
-    tone: "red",
-    summary:
-      "Image and video restoration, and diffusion-based generation, for shipping camera pipelines.",
-    points: [
-      "Led quantized post-training for the Mate 70 night-HDR restoration network — shipped weekly to production",
-      "Redesigned video-restoration architectures, improving perceptual quality and detail reconstruction",
-      "Optimized diffusion training for high-frequency texture synthesis — ~10% over baselines on FID/PSNR",
-    ],
+    org: "Mining University",
+    short: "Mining Univ.",
+    mark: "MU",
+    role: "Research Intern, Robotics Lab",
+    from: "2021",
+    to: "2021",
+    summary: "On-device perception for pipeline-inspection robots at oil and gas plants; patent granted.",
   },
   {
     org: "ITMO University",
-    mark: "ITMO",
-    role: "Deep Learning Engineer · Industry AI Lab",
+    short: "ITMO",
+    mark: "IT",
+    href: "https://en.itmo.ru/",
+    role: "Deep Learning Engineer, Industry AI Lab",
     from: "2022",
     to: "2023",
-    tone: "oryel",
-    summary: "End-to-end data and model pipelines for industrial vision.",
-    points: [
-      "Distilled banknote segmentation models — 20% fewer FLOPs at no accuracy cost",
-      "Contrastive learning lifted fake-stamp detection by +10% F1",
-    ],
+    summary: "End-to-end data and model pipelines for industrial vision: distillation, contrastive learning.",
   },
   {
-    org: "Mining University",
-    mark: "Mining Univ.",
-    role: "Research Intern · Robotics Lab",
-    from: "2021",
-    to: "2021",
-    tone: "magenta",
-    summary:
-      "On-device perception for pipeline-inspection robots at oil and gas plants.",
-    points: [
-      "Replaced ~€56K/year of manual inspection",
-      "Patent granted",
-    ],
+    org: "Huawei Research Institute",
+    short: "Huawei",
+    mark: "H",
+    logo: "logos/huawei.svg",
+    href: "https://www.huawei.com/",
+    role: "AI Researcher",
+    from: "2023",
+    to: "2025",
+    summary: "Video restoration and diffusion for camera pipelines; led post-training of the Mate 70 night-HDR network.",
+  },
+  {
+    org: "Own startup",
+    short: "Startup",
+    mark: "S",
+    role: "Founder, Lead ML Engineer",
+    from: "2025",
+    to: "2025",
+    summary: "Retail computer vision for 3 of the top-5 national retailers; raised ~€100K, acquired within the year.",
+  },
+  {
+    org: "TradingView",
+    short: "TradingView",
+    mark: "TV",
+    logo: "logos/tradingview.svg",
+    href: "https://www.tradingview.com/",
+    role: "Senior ML Engineer",
+    from: "2025",
+    to: "now",
+    summary: "Evaluation harness and multimodal search for an agentic chart-analysis copilot with 2M+ monthly users.",
+  },
+  {
+    org: "INSAIT",
+    short: "INSAIT",
+    mark: "IN",
+    href: "https://insait.ai/",
+    role: "Research Scientist",
+    from: "2026",
+    to: "now",
+    summary: "Generative vision and image restoration with Dr. Jinjin Gu, through the ELLIS programme.",
   },
 ];
 
 export const education = [
   {
-    degree: "M.Sc.",
-    field: "Machine Learning",
+    degree: "M.Sc. Machine Learning",
     org: "ITMO University",
+    mark: "IT",
     years: "2022–2024",
-    note: "GPA 4.9/5. Thesis: enhancing image super-resolution through depth estimation.",
+    note: "Thesis: enhancing image super-resolution through depth estimation.",
   },
   {
-    degree: "B.Sc.",
-    field: "Engineering",
+    degree: "B.Sc. Engineering",
     org: "Mining University",
+    mark: "MU",
     years: "2018–2022",
-    note: "GPA 4.9/5. Thesis: real-time obstacle detection for robotic exploration with LiDAR.",
+    note: "Thesis: real-time obstacle detection for robotic exploration with LiDAR.",
   },
 ];

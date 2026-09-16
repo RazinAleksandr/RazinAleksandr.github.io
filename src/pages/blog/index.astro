@@ -10,107 +10,40 @@ const posts = (await getCollection("blog", ({ data }) => import.meta.env.DEV || 
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
-<Base title="Blog — Aleksandr Razin" description="Notes on generative vision, image restoration and shipping ML.">
-  <div class="wrap">
-    <header class="head">
-      <h1 class="h">Blog</h1>
-      <p class="sub">Notes on generative vision, image restoration, and what actually
-        survives contact with production.</p>
-    </header>
+<Base current="blog" title="Blog — Aleksandr Razin" description="Notes on generative vision, image restoration and shipping ML.">
+  <section class="section">
+    <h2>Blog</h2>
+    <p class="sub">Notes on generative vision, image restoration, and what survives contact with production.</p>
 
     {posts.length === 0 ? (
-      <div class="empty">
-        <p class="mono tag">No posts yet</p>
-        <p class="msg">The first one is being written.</p>
-        <p class="hint">
-          In the meantime, the <a href={href("#papers")}>papers</a> and
-          <a href={href("#projects")}>projects</a> on the home page are the shortest
-          route to what I work on.
-        </p>
-      </div>
+      <p class="empty">Nothing here yet. The <a href={href("#publications")}>papers</a> and
+        <a href={href("#projects")}>projects</a> are the shortest route to what I work on.</p>
     ) : (
       <ol class="posts">
         {posts.map((p) => (
-          <li class="post">
-            <div class="meta mono">
+          <li>
+            <p class="meta mono">
               <time datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time>
-              <span class="dot">●</span>
-              <span>Read time ~{readingTime(p.body ?? "")} min</span>
-              {p.data.draft && <span class="draft">draft</span>}
-            </div>
-            <h2 class="title">
-              <a href={href(`blog/${p.id}`)}><span class="hl">{p.data.title}</span></a>
-            </h2>
+              · {readingTime(p.body ?? "")} min read
+              {p.data.draft && <> · draft</>}
+            </p>
+            <h3><a href={href(`blog/${p.id}`)}>{p.data.title}</a></h3>
             <p class="excerpt">{p.data.description}</p>
           </li>
         ))}
       </ol>
     )}
-  </div>
+  </section>
 </Base>
 
 <style>
-  .head { padding-block: 44px 8px; }
-  .h {
-    margin: 0;
-    font-variation-settings: "wdth" 118, "wght" 760;
-    font-size: clamp(34px, 8vw, 50px);
-    line-height: .95;
-    letter-spacing: -.025em;
-  }
-  .sub { margin: 14px 0 0; color: var(--ink-2); font-size: 16px; max-width: 56ch; }
-
-  .posts { list-style: none; margin: 0; padding: 40px 0 20px; display: grid; gap: 38px; }
-
-  .meta {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 11px;
-    letter-spacing: .05em;
-    text-transform: none;
-    flex-wrap: wrap;
-  }
-  .dot { font-size: 7px; color: var(--ink-3); }
-  .draft {
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-    padding: 1px 7px;
-    font-size: 9px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-
-  .title { margin: 9px 0 0; font-size: clamp(21px, 4.6vw, 28px); line-height: 1.2; }
-  .title a { text-decoration: none; }
-  .hl {
-    background: color-mix(in srgb, var(--p-blue) 36%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--p-blue) 55%, transparent);
-    border-radius: 5px;
-    padding: 2px 9px;
-    font-variation-settings: "wdth" 110, "wght" 700;
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-  }
-  .title a:hover .hl { background: color-mix(in srgb, var(--p-blue) 58%, transparent); }
-
-  .excerpt { margin: 14px 0 0; color: var(--ink-2); font-size: 15.5px; line-height: 1.6; max-width: 72ch; }
-
-  .empty {
-    margin: 52px 0 40px;
-    padding: 40px 28px;
-    border: 1px dashed var(--rule);
-    border-radius: var(--r-md);
-    text-align: center;
-  }
-  .empty .tag { color: var(--accent); margin: 0; }
-  .empty .msg {
-    margin: 14px 0 0;
-    font-size: 20px;
-    font-variation-settings: "wdth" 110, "wght" 660;
-  }
-  .empty .hint { margin: 10px auto 0; color: var(--ink-2); font-size: 14.5px; max-width: 48ch; }
-  .empty a { color: var(--accent); text-decoration: none; }
-  .empty a:hover { text-decoration: underline; }
+  .sub { margin-top: -8px; color: var(--muted); font-size: 15.5px; max-width: 56ch; }
+  .empty { margin-top: 28px; color: var(--muted); font-size: 15.5px; }
+  .posts { list-style: none; margin: 28px 0 0; padding: 0; display: grid; }
+  .posts li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .posts li:first-child { border-top: 0; padding-top: 0; }
+  h3 { margin-top: 4px; font-size: 21px; }
+  h3 a { color: var(--ink); }
+  h3 a:hover { color: var(--accent); text-decoration: none; }
+  .excerpt { margin-top: 6px; color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 66ch; }
 </style>

@@ -13,7 +13,6 @@ export type Project = {
   owner?: string;
   blurb: string;
   lang: string;
-  tone: string;
   stars: number;
   href?: string;
   /** Pulls it out of the grid into the wide, featured slot. */
@@ -28,7 +27,6 @@ export const projects: Project[] = [
     blurb:
       "Latent Upscaling Adapter — super-resolution on the diffusion latent before the single VAE decode. The ECCV 2026 paper's reference implementation.",
     lang: "Python",
-    tone: "red",
     stars: 62,
     featured: true,
   },
@@ -38,7 +36,6 @@ export const projects: Project[] = [
     blurb:
       "An agent skill for renting and managing Vast.ai GPUs — search offers by effective session cost, rent under a cap, run jobs, pull results, stop billing.",
     lang: "Python",
-    tone: "cyan",
     stars: 3,
   },
   {
@@ -46,7 +43,6 @@ export const projects: Project[] = [
     repo: "visa-agent-skill",
     blurb: "An agent skill for navigating visa application logistics.",
     lang: "Python",
-    tone: "oryel",
     stars: 4,
   },
   {
@@ -55,7 +51,6 @@ export const projects: Project[] = [
     blurb:
       "Real-time observability dashboard for agentic systems — watch what a fleet of agents is actually doing.",
     lang: "TypeScript",
-    tone: "green",
     stars: 0,
   },
   {
@@ -64,7 +59,6 @@ export const projects: Project[] = [
     blurb:
       "The LUA project page: interactive comparisons, the animated pipeline figure, and the numbers behind the paper.",
     lang: "CSS",
-    tone: "magenta",
     stars: 2,
   },
   {
@@ -73,7 +67,6 @@ export const projects: Project[] = [
     blurb:
       "An autonomous trading agent for Polymarket prediction markets.",
     lang: "Python",
-    tone: "blue",
     stars: 0,
   },
   {
@@ -81,7 +74,6 @@ export const projects: Project[] = [
     repo: "support-rag-agent",
     blurb: "Retrieval-augmented support agent on FastAPI and LangGraph.",
     lang: "Python",
-    tone: "cyan",
     stars: 1,
   },
   {
@@ -90,7 +82,6 @@ export const projects: Project[] = [
     blurb:
       "MSc thesis code: depth maps as a structural prior for image super-resolution, reducing blur and spatial inconsistency.",
     lang: "Jupyter",
-    tone: "green",
     stars: 1,
   },
 ];

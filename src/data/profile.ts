@@ -1,66 +1,35 @@
 /**
  * Everything about the person, in one place.
- * Facts come from CV.pdf and independently verified sources — see README.
+ * Facts come from the CV and independently verified sources — see README.
+ * Paragraphs take inline markdown: **bold**, *italic* and [text](href).
  */
 
 export const profile = {
   name: "Aleksandr Razin",
-  first: "Aleksandr",
-  last: "Razin",
   role: "Research Scientist",
   org: "INSAIT",
+  orgHref: "https://insait.ai/",
   location: "Sofia, Bulgaria",
-  timezone: "Europe/Sofia",
   email: "razin.x.aleks@gmail.com",
 
   /** The one-sentence answer to "who is this". */
   tagline: "Generative vision, image restoration and multimodal agents.",
 
-  /**
-   * Intro paragraphs. `chip` marks a span that renders as a highlighted
-   * entity — organisations, people, venues.
-   */
   intro: [
-    [
-      "I'm a ", { chip: "Research Scientist", tone: "accent" }, " at ",
-      { chip: "INSAIT", tone: "green" }, " in Sofia, working on generative vision and ",
-      "image restoration with ", { chip: "Dr. Jinjin Gu", tone: "cyan", href: "https://insait.ai/dr-jinjin-gu/" },
-      " through the ", { chip: "ELLIS", tone: "blue" }, " programme.",
-    ],
-    [
-      "Before that I spent five years shipping this work rather than only writing it: ",
-      "video restoration and diffusion at ", { chip: "Huawei", tone: "red" },
-      " — including the night-HDR network that went out on the ", { chip: "Mate 70", tone: "magenta" },
-      " — a computer-vision startup I founded and sold, and the agentic AI copilot at ",
-      { chip: "TradingView", tone: "cyan" }, " that serves 2M+ people a month.",
-    ],
-    [
-      "My first-author paper on latent upscaling for diffusion models was accepted at ",
-      { chip: "ECCV 2026", tone: "red" }, " and reached ",
-      { chip: "#1 on Hugging Face Daily Papers", tone: "oryel", href: "https://huggingface.co/papers/2511.10629" }, ".",
-    ],
+    "I am a Research Scientist at [INSAIT](https://insait.ai/) in Sofia, where I work on generative vision and image restoration with [Dr. Jinjin Gu](https://insait.ai/dr-jinjin-gu/) as part of the [ELLIS](https://ellis.eu/) programme. My research asks how diffusion models can produce high-resolution images without paying for every pixel twice.",
+    "Before INSAIT I spent five years shipping this kind of work: video restoration and diffusion at Huawei, where I led the post-training of the night-HDR network on the Mate 70; a computer-vision startup I founded and sold; and the evaluation harness behind TradingView's agentic copilot, used by two million people a month.",
+    "My first-author paper, the Latent Upscaling Adapter, was accepted at **ECCV 2026** and was the [#1 Hugging Face Daily Paper](https://huggingface.co/papers/2511.10629) on the day it appeared.",
   ],
+
+  interests: ["Diffusion models", "Super-resolution & restoration", "Efficient generation", "Multimodal agents"],
 
   links: {
     github: "https://github.com/RazinAleksandr",
     linkedin: "https://www.linkedin.com/in/a-razin/",
     scholar: "https://scholar.google.com/citations?user=-AsUnsgAAAAJ",
     telegram: "https://t.me/Razin_Aleks",
-    card: "https://razinaleksandr.github.io/visitcard/",
   },
 
-  /**
-   * The numbers worth leading with. Deliberately NOT citation count:
-   * these are where the record is actually strong.
-   */
-  metrics: [
-    { value: "#1", label: "Hugging Face Daily Paper", sub: "14 Nov 2025 · 133 upvotes", tone: "oryel" },
-    { value: "ECCV 26", label: "first & corresponding author", sub: "Latent Upscaling Adapter", tone: "red" },
-    { value: "2M+", label: "monthly users", sub: "TradingView AI copilot", tone: "cyan" },
-    { value: "Mate 70", label: "shipped to production", sub: "night-HDR video restoration", tone: "green" },
-    { value: "€100K", label: "raised · acquired 2025", sub: "retail video analytics", tone: "blue" },
-    { value: "Patent", label: "granted", sub: "pipeline-inspection robotics", tone: "magenta" },
-  ],
+  /** The PDF in public/cv/. `updated` is shown next to the download link. */
+  cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "July 2026" },
 } as const;
-
-export type IntroSpan = string | { chip: string; tone: string; href?: string };

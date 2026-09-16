@@ -1,9 +1,10 @@
 /**
  * Publications, newest first.
  *
- * `authors` is split so the component can bold me without string matching.
- * Every link here was checked against the live source — don't add one you
- * haven't opened.
+ * `authors` is split so the component can mark me without string matching.
+ * `image` is relative to public/ and gets the site's base path at render
+ * time, so it works at the domain root and under /next/ alike.
+ * Every link here was checked against the live source.
  */
 
 export type Publication = {
@@ -11,8 +12,8 @@ export type Publication = {
   authors: { name: string; me?: boolean }[];
   venue: string;
   year: string;
-  /** Short badges. `tone` maps to a ColorChecker patch. */
-  badges: { label: string; tone: string }[];
+  /** Short note after the venue, e.g. an award. */
+  note?: string;
   abstract: string;
   image?: string;
   links: { label: string; href: string }[];
@@ -30,14 +31,10 @@ export const publications: Publication[] = [
     ],
     venue: "ECCV",
     year: "2026",
-    badges: [
-      { label: "ECCV 2026", tone: "red" },
-      { label: "#1 HF Daily", tone: "oryel" },
-      { label: "first author", tone: "green" },
-    ],
+    note: "#1 Hugging Face Daily Paper",
     abstract:
-      "Diffusion models pay for high resolution twice: once denoising at scale, and again when post-hoc super-resolution adds artifacts after decoding. LUA upscales the generator's latent before the single VAE decode instead — a drop-in module needing no change to the base model and no extra diffusion stages. 2× faster at 2K and over 20× at 4K, transferable across SDXL, SD3 and FLUX.",
-    image: "/pubs/lua.jpg",
+      "Diffusion models pay for resolution twice: denoising at scale, then post-hoc super-resolution that adds artifacts after decoding. LUA upscales the latent before the single VAE decode instead — a drop-in module with no change to the base model and no extra diffusion stage. 2× faster at 2K and over 20× at 4K, transferable across SDXL, SD3 and FLUX.",
+    image: "pubs/lua.jpg",
     links: [
       { label: "arXiv", href: "https://arxiv.org/abs/2511.10629" },
       { label: "Project page", href: "https://razinaleksandr.github.io/latent-upscaling-adapter/" },
@@ -64,9 +61,8 @@ export const publications: Publication[] = [
       { name: "Auezh Aliev" },
       { name: "Sergey Kovalchuk" },
     ],
-    venue: "Journal of ITMO",
+    venue: "Scientific and Technical Journal of ITMO",
     year: "2024",
-    badges: [{ label: "Journal", tone: "cyan" }],
     abstract:
       "Fine-tuning pretrained language models on structured, diverse online forum data to improve question answering in the programming domain.",
     links: [],
@@ -83,10 +79,7 @@ export const publications: Publication[] = [
     ],
     venue: "Infrastructures",
     year: "2022",
-    badges: [
-      { label: "MDPI 7(6), 75", tone: "magenta" },
-      { label: "27 citations", tone: "green" },
-    ],
+    note: "MDPI 7(6), 75",
     abstract:
       "A crawling robot for surveying pipelines and metal structures of complex spatial configuration at oil and gas facilities, with on-device perception replacing manual inspection.",
     links: [

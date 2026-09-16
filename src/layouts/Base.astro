@@ -1,41 +1,49 @@
 ---
 import "../styles/global.css";
 import { profile } from "../data/profile";
+import Portrait from "../components/Portrait.astro";
+import Icon from "../components/Icon.astro";
 
 interface Props {
   title?: string;
   description?: string;
-  /** Hides the big name in the nav on the home page, where the hero has it. */
-  bare?: boolean;
+  /** Which nav entry is current: "home" | "cv" | "blog". */
+  current?: string;
 }
 
 const {
   title = profile.name,
   description = `${profile.name} — ${profile.role} at ${profile.org}, ${profile.location}. ${profile.tagline}`,
-  bare = false,
+  current = "home",
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const href = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
+const portrait = href("portrait-900.jpg");
+
+const sections = [
+  ["about", "About"],
+  ["news", "News"],
+  ["experience", "Experience"],
+  ["publications", "Publications"],
+  ["projects", "Projects"],
+];
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E" +
-  "%3Crect width='32' height='32' rx='7' fill='%230E1113'/%3E" +
-  "%3Crect x='6' y='6' width='8.5' height='8.5' rx='2' fill='%230885A1'/%3E" +
-  "%3Crect x='17.5' y='6' width='8.5' height='8.5' rx='2' fill='%23E0A32E'/%3E" +
-  "%3Crect x='6' y='17.5' width='8.5' height='8.5' rx='2' fill='%23AF363C'/%3E" +
-  "%3Crect x='17.5' y='17.5' width='8.5' height='8.5' rx='2' fill='%23469449'/%3E%3C/svg%3E";
+  "%3Crect width='32' height='32' rx='6' fill='%23faf9f7'/%3E" +
+  "%3Ctext x='16' y='22' font-family='Georgia,serif' font-weight='600' font-size='18' text-anchor='middle' fill='%23c8102e'%3EAR%3C/text%3E%3C/svg%3E";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0E1113" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#DCDAD3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131010" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href={favicon} />
     <link rel="sitemap" href={href("sitemap-index.xml")} />
 
@@ -47,155 +55,189 @@ const favicon =
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-    />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" />
 
     <script is:inline>
-      // Set the theme before first paint so the page never flashes the wrong one.
       try {
-        var t = localStorage.getItem("site-theme");
+        var t = localStorage.getItem("theme");
         if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     </script>
   </head>
 
   <body>
-    <header class="nav">
-      <div class="wrap navin">
-        <a class="home" href={href("")}>
-          {bare ? <span class="mark">A. RAZIN</span> : <span class="mark">A. RAZIN</span>}
+    <div class="layout">
+      <aside class="side">
+        <a class="photo" href={href("")} aria-label="Home">
+          <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
         </a>
-        <nav class="links">
-          <a href={href("#work")}>work</a>
-          <a href={href("#papers")}>papers</a>
-          <a href={href("#projects")}>projects</a>
-          <a href={href("blog")} class="blog">blog →</a>
-        </nav>
-        <button class="tgl" id="themeBtn" type="button" aria-pressed="false">Daylight</button>
-      </div>
-    </header>
 
-    <main>
-      <slot />
-    </main>
-
-    <footer class="foot">
-      <div class="wrap">
-        <p class="tagline">{profile.tagline}</p>
-        <div class="linkrow">
-          <a href={profile.links.github} target="_blank" rel="noopener">GitHub</a>
-          <a href={profile.links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
-          <a href={profile.links.scholar} target="_blank" rel="noopener">Scholar</a>
-          <a href={profile.links.telegram} target="_blank" rel="noopener">Telegram</a>
-          <a href={`mailto:${profile.email}`}>Email</a>
+        <div class="who">
+          <h1 class="name"><a href={href("")}>{profile.name}</a></h1>
+          <p class="role">{profile.role}, <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a></p>
+          <p class="where mono">{profile.location}</p>
         </div>
-        <p class="mono colophon">
-          Palette calibrated to an X-Rite ColorChecker · portrait decoded from a latent
-        </p>
-      </div>
-    </footer>
+
+        <ul class="contacts">
+          <li><a href={`mailto:${profile.email}`}><Icon name="mail" /> <span class="long">{profile.email}</span><span class="short">Email</span></a></li>
+          <li><a href={profile.links.scholar} target="_blank" rel="noopener"><Icon name="scholar" size={15} /> Google Scholar</a></li>
+          <li><a href={profile.links.github} target="_blank" rel="noopener"><Icon name="github" size={15} /> GitHub</a></li>
+          <li><a href={profile.links.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" size={14} /> LinkedIn</a></li>
+          <li><a href={profile.links.telegram} target="_blank" rel="noopener"><Icon name="telegram" size={15} /> Telegram</a></li>
+        </ul>
+
+        <nav class="nav" aria-label="Site">
+          <ul>
+            {sections.map(([id, label]) => (
+              <li><a href={current === "home" ? `#${id}` : href(`#${id}`)}>{label}</a></li>
+            ))}
+          </ul>
+          <ul class="pages">
+            <li><a href={href("cv")} aria-current={current === "cv" ? "page" : undefined}><Icon name="file" size={15} /> CV</a></li>
+            <li><a href={href("blog")} aria-current={current === "blog" ? "page" : undefined}><Icon name="pen" size={15} /> Blog</a></li>
+          </ul>
+        </nav>
+
+        <button class="theme" id="themeBtn" type="button" aria-label="Toggle light or dark theme">
+          <Icon name="moon" size={15} class="ic-moon" />
+          <Icon name="sun" size={15} class="ic-sun" />
+        </button>
+      </aside>
+
+      <main class="main">
+        <slot />
+        <footer class="foot">
+          <span>© {new Date().getFullYear()} {profile.name}</span>
+          <a href="https://github.com/RazinAleksandr/RazinAleksandr.github.io" target="_blank" rel="noopener">Source</a>
+        </footer>
+      </main>
+    </div>
 
     <script>
       const root = document.documentElement;
       const btn = document.getElementById("themeBtn");
-      const isLight = () => {
+      const isDark = () => {
         const t = root.getAttribute("data-theme");
-        if (t === "light") return true;
-        if (t === "dark") return false;
-        return matchMedia("(prefers-color-scheme: light)").matches;
+        return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
       };
-      const paint = () => {
-        if (!btn) return;
-        btn.textContent = isLight() ? "Darkroom" : "Daylight";
-        btn.setAttribute("aria-pressed", isLight() ? "true" : "false");
-      };
-      paint();
       btn?.addEventListener("click", () => {
-        const next = isLight() ? "dark" : "light";
+        const next = isDark() ? "light" : "dark";
         root.setAttribute("data-theme", next);
-        try { localStorage.setItem("site-theme", next); } catch (e) {}
-        paint();
+        try { localStorage.setItem("theme", next); } catch (e) {}
       });
     </script>
   </body>
 </html>
 
 <style>
-  .nav {
+  .layout {
+    display: grid;
+    grid-template-columns: var(--side) minmax(0, 1fr);
+    max-width: 1120px;
+    margin-inline: auto;
+    padding-inline: 24px;
+    gap: 64px;
+  }
+
+  /* ---- sidebar ---- */
+  .side {
     position: sticky;
     top: 0;
-    z-index: 50;
-    background: color-mix(in srgb, var(--ground) 86%, transparent);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--rule-soft);
-  }
-  .navin {
+    align-self: start;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    padding-block: 44px 28px;
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-block: 11px;
+    flex-direction: column;
+    gap: 22px;
+    scrollbar-width: none;
   }
-  .home { text-decoration: none; }
-  .mark {
-    font-family: var(--font-m);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .17em;
-    color: var(--ink);
-  }
-  .links {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: auto;
-    flex-wrap: wrap;
-  }
-  .links a {
-    font-family: var(--font-m);
-    font-size: 11px;
-    letter-spacing: .07em;
-    text-decoration: none;
-    color: var(--ink-3);
-    padding: 5px 9px;
-    border-radius: 999px;
-  }
-  .links a:hover { color: var(--ink); }
-  .links a.blog {
-    color: var(--ink);
-    border: 1px solid var(--accent);
-    box-shadow: 0 0 14px -6px var(--accent);
-  }
-  .links a.blog:hover { background: var(--accent); color: var(--accent-ink); }
+  .side::-webkit-scrollbar { display: none; }
 
-  .tgl {
-    font-family: var(--font-m);
-    font-size: 9.5px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-2);
-    background: transparent;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    padding: 5px 10px;
+  .photo { display: block; width: 100%; max-width: 232px; }
+
+  .name { font-size: 28px; font-weight: 600; line-height: 1.15; }
+  .name a { color: var(--ink); }
+  .name a:hover { text-decoration: none; }
+  .role { margin-top: 6px; font-size: 15px; color: var(--muted); line-height: 1.45; }
+  .role a { color: var(--ink); }
+  .where { margin-top: 4px; }
+
+  .contacts, .nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .contacts a, .nav a {
+    display: inline-flex; align-items: center; gap: 9px;
+    color: var(--ink); font-size: 14.5px; line-height: 1.3;
+  }
+  .contacts a { color: var(--muted); }
+  .contacts a:hover, .nav a:hover { color: var(--accent); text-decoration: none; }
+  .contacts svg, .nav svg { color: var(--faint); flex: none; }
+  .contacts .short { display: none; }
+  .contacts a:hover svg, .nav a:hover svg { color: var(--accent); }
+
+  .nav { padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+  .nav .pages { padding-top: 14px; border-top: 1px solid var(--line); }
+  .nav a[aria-current="page"] { color: var(--accent); }
+  .nav a[aria-current="page"] svg { color: var(--accent); }
+
+  .theme {
+    margin-top: auto;
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: var(--card);
+    color: var(--muted);
     cursor: pointer;
-    white-space: nowrap;
   }
-  .tgl:hover { color: var(--ink); border-color: var(--accent); }
-
-  @media (max-width: 560px) {
-    .links a { padding: 5px 7px; font-size: 10px; }
-    .tgl { display: none; }
+  .theme:hover { color: var(--accent); }
+  .theme :global(.ic-sun) { display: none; }
+  :global(:root[data-theme="dark"]) .theme :global(.ic-moon) { display: none; }
+  :global(:root[data-theme="dark"]) .theme :global(.ic-sun) { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .theme :global(.ic-moon) { display: none; }
+    :global(:root:not([data-theme="light"])) .theme :global(.ic-sun) { display: block; }
   }
 
+  /* ---- main ---- */
+  .main {
+    max-width: var(--measure);
+    padding-block: 52px 40px;
+    min-width: 0;
+  }
   .foot {
-    margin-top: 60px;
-    border-top: 1px solid var(--rule-soft);
-    padding-block: 34px 48px;
-    text-align: center;
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex; gap: 18px;
+    font-size: 13px; color: var(--faint);
   }
-  .foot .linkrow { justify-content: center; margin-top: 16px; }
-  .tagline { margin: 0; color: var(--ink-2); font-size: 15px; }
-  .colophon { margin: 20px 0 0; font-size: 9.5px; letter-spacing: .08em; }
+  .foot a { color: var(--faint); }
+  .foot a:hover { color: var(--accent); }
+
+  /* ---- narrow: the sidebar becomes a header ---- */
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; padding-inline: 20px; }
+    .side {
+      position: static; height: auto; overflow: visible;
+      padding-block: 28px 0;
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      grid-template-areas: "photo who" "contacts contacts" "nav nav";
+      column-gap: 18px; row-gap: 18px;
+      align-items: center;
+    }
+    .photo { grid-area: photo; max-width: 96px; }
+    .who { grid-area: who; }
+    .name { font-size: 24px; }
+    .contacts { grid-area: contacts; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .contacts .long { display: none; }
+    .contacts .short { display: inline; }
+    .nav { grid-area: nav; padding-top: 14px; }
+    .nav ul { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .nav .pages { padding-top: 0; border-top: 0; }
+    .theme { position: fixed; right: 16px; bottom: 16px; z-index: 10; box-shadow: var(--shadow); }
+    .main { padding-top: 36px; }
+  }
 </style>

@@ -1,0 +1,124 @@
+---
+/**
+ * Two views of the same list. The strip runs left to right in time, oldest
+ * first, the way a reader moves; the detail below is newest first, the way a
+ * reader looks something up.
+ */
+import { experience, education } from "../data/experience";
+import Logo from "./Logo.astro";
+
+const chrono = experience;
+const recent = [...experience].reverse();
+const span = (r: (typeof experience)[number]) =>
+  r.from === r.to ? r.from : `${r.from}–${r.to === "now" ? "" : r.to}`;
+---
+
+<section class="section" id="experience">
+  <h2>Experience</h2>
+
+  <ol class="strip" aria-label="Timeline, oldest to newest">
+    {chrono.map((r) => (
+      <li>
+        <Logo logo={r.logo} mark={r.mark} title={r.org} />
+        <span class="s-name">{r.short}</span>
+        <span class="s-years mono">{span(r)}</span>
+      </li>
+    ))}
+  </ol>
+
+  <ul class="roles">
+    {recent.map((r) => (
+      <li>
+        <Logo logo={r.logo} mark={r.mark} title={r.org} />
+        <div class="text">
+          <div class="head">
+            <h3>{r.href ? <a href={r.href} target="_blank" rel="noopener">{r.org}</a> : r.org}</h3>
+            <span class="role">{r.role}</span>
+          </div>
+          <p class="sum">{r.summary}</p>
+        </div>
+        <span class="years mono">{span(r)}</span>
+      </li>
+    ))}
+  </ul>
+
+  <h3 class="sub">Education</h3>
+  <ul class="roles edu">
+    {education.map((e) => (
+      <li>
+        <Logo mark={e.mark} title={e.org} />
+        <div class="text">
+          <div class="head">
+            <h3>{e.org}</h3>
+            <span class="role">{e.degree}</span>
+          </div>
+          <p class="sum">{e.note}</p>
+        </div>
+        <span class="years mono">{e.years}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  /* ---- the timeline strip ---- */
+  .strip {
+    list-style: none; margin: 0 0 30px; padding: 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  /* the line runs behind the tiles, through their centres */
+  .strip::before {
+    content: "";
+    position: absolute;
+    left: calc(100% / 12); right: calc(100% / 12);
+    top: 16px;
+    height: 1px;
+    background: var(--line-strong);
+  }
+  .strip li {
+    position: relative;
+    display: grid; justify-items: center; gap: 6px;
+    text-align: center;
+    min-width: 0;
+  }
+  .strip :global(.tile) { box-shadow: 0 0 0 4px var(--paper); }
+  .s-name { font-size: 13px; line-height: 1.25; color: var(--ink); }
+  .s-years { font-size: 11.5px; color: var(--faint); }
+
+  /* ---- the list ---- */
+  .roles { list-style: none; margin: 0; padding: 0; display: grid; }
+  .roles li {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .roles li:first-child { border-top: 0; padding-top: 0; }
+  .text { min-width: 0; }
+  .head { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
+  .head h3 { font-family: var(--sans); font-size: 15.5px; font-weight: 600; }
+  .head h3 a { color: var(--ink); }
+  .head h3 a:hover { color: var(--accent); text-decoration: none; }
+  .role { font-size: 14px; color: var(--muted); }
+  .sum { margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+  .years { padding-top: 2px; white-space: nowrap; }
+
+  .sub {
+    margin: 30px 0 8px;
+    font-family: var(--mono); font-weight: 400; font-size: 12.5px;
+    color: var(--faint); letter-spacing: .04em; text-transform: uppercase;
+  }
+  .edu li:first-child { border-top: 1px solid var(--line); padding-top: 14px; }
+
+  @media (max-width: 620px) {
+    .strip { grid-template-columns: repeat(3, 1fr); row-gap: 18px; }
+    .strip::before { display: none; }
+    .roles li { grid-template-columns: 32px minmax(0, 1fr); }
+    .years { grid-column: 2; padding-top: 0; }
+  }
+</style>

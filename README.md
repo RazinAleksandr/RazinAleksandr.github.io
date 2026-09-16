@@ -2,15 +2,12 @@
 
 Personal site — Astro, static, deployed to GitHub Pages by Actions.
 
-The hero runs my portrait through the pipeline from my own paper: a noisy
-channel-mean **latent**, the **×4 upscaled latent**, then one **decode** to RGB,
-with the same mono captions as the figure in the LUA paper. It plays once on
-load and rests on `decoded`; every stage stays reachable by clicking the rail,
-and clicking the image replays it.
-
-The palette is an X-Rite ColorChecker — the same system as the
-[visit card](https://razinaleksandr.github.io/visitcard/), so the two read as
-one identity.
+It shares its design language with the [LUA project page](https://razinaleksandr.github.io/latent-upscaling-adapter/):
+paper and ink, one accent, a text serif for headings and the system sans for
+reading. The portrait in the sidebar decodes once on load the way the paper's
+pipeline figure is drawn — a coarse channel-mean latent in the figure's
+diverging colormap, the ×4 latent, then the photograph — and then simply sits
+there. Click it to replay; with reduced motion it is just the photograph.
 
 ## Running it
 
@@ -23,32 +20,43 @@ npm run preview    # serve the built output
 
 Node 22+. No other setup.
 
+## Pages
+
+| Route | What it is |
+| --- | --- |
+| `/` | About, news, experience, publications, projects |
+| `/cv` | The CV as a PDF, embedded, with a download button |
+| `/blog` | Posts from `src/content/blog/` |
+
 ## Where the content lives
 
 All of it is data, not markup — edit these and the page follows:
 
 | File | What it drives |
 | --- | --- |
-| `src/data/profile.ts` | name, role, intro paragraphs, the six metric tiles |
+| `src/data/profile.ts` | name, role, intro paragraphs, interests, links, CV file |
 | `src/data/news.ts` | the dated `YYYY.MM` news list |
-| `src/data/experience.ts` | the company strip, the role timeline, education |
-| `src/data/publications.ts` | papers, badges, links, BibTeX |
+| `src/data/experience.ts` | the timeline strip, the role list, education |
+| `src/data/publications.ts` | papers, thumbnails, links, BibTeX |
 | `src/data/projects.ts` | repositories (star counts are fetched live — see below) |
 
-**Intro chips.** In `profile.ts`, the intro is an array of spans; a span written
-as `{ chip: "INSAIT", tone: "green" }` renders as a highlighted entity, and
-adding `href` makes it a link. Tones map to ColorChecker patches: `cyan`,
-`oryel`, `red`, `green`, `blue`, `magenta`, `accent`.
+**Intro and news** take inline markdown — `**bold**`, `*italic*`, `` `code` ``,
+`[text](href)` — and nothing else; the text is escaped first, so data files
+can't inject markup.
 
-**News.** `date` is printed verbatim, so an entry whose month I can't source is
-written as the year alone rather than guessed. Bodies take inline markdown —
-`**bold**`, `*italic*`, `` `code` ``, `[text](href)` — and nothing else; the
-text is escaped before that, so data files can't inject markup.
+**Experience** is written oldest first. The strip renders it in that order,
+left to right, so the timeline reads the way time does; the list under it is
+reversed to newest first. Each organisation shows an icon: the SVG named in
+`logo` (from `public/logos/`), or, without one, the `mark` monogram in the
+same tile, so the row stays uniform whether or not a usable logo exists.
 
-**Company logos.** The strip uses typographic wordmarks rather than logo files,
-which keeps it visually consistent and ships no third-party trademarks. To use
-real logos, drop them in `public/logos/` and add `logo: "/logos/huawei.svg"` to
-that role — the component prefers it when present.
+**Paper thumbnails** are paths relative to `public/` (e.g. `pubs/lua.jpg`)
+and get the site's base path at render time, so they work at the domain root
+and under `/next/` alike. A paper without an image gets a plain panel with
+its venue.
+
+**The CV** is `public/cv/Aleksandr_Razin_CV.pdf`. Replace the file and update
+`cv.updated` in `profile.ts`.
 
 **Star counts** come from the GitHub API at build time. If the API is
 unreachable or rate-limited the build falls back to the `stars` snapshot in
@@ -69,38 +77,30 @@ to a real name to publish:
 cp src/content/blog/_template.md src/content/blog/latent-upscaling.md
 ```
 
-`draft: true` shows a post in `npm run dev` but keeps it out of production, so
-you can work on one without hiding it from yourself. Reading time is computed
-from the body at 200 wpm — you don't set it. With no posts, `/blog` shows a
-deliberate empty state rather than a blank page.
+`draft: true` shows a post in `npm run dev` but keeps it out of production.
+Reading time is computed from the body at 200 wpm. With no posts, `/blog`
+shows a short note rather than a blank page.
 
 ## Deploying
 
-`.github/workflows/deploy.yml` builds and publishes on every push to `main`.
-Set **Settings → Pages → Source** to **GitHub Actions**.
-
-The workflow works out the base path itself: a repo named `<user>.github.io`
-builds for the domain root, anything else builds for `/<repo>/`. So the same
-commit is correct whether this lives at `razinaleksandr.github.io` or at
-`razinaleksandr.github.io/site/`, with nothing to remember. Locally you can
-reproduce a subpath build with `BASE_PATH=/site/ npm run build`.
+`.github/workflows/deploy-astro.yml` builds on every push. From `main` it
+publishes to the root of `gh-pages`; from any other branch it publishes to
+`gh-pages/next`, live at `/next/`, so a redesign can be checked in place
+before it replaces the main page. Locally, `BASE_PATH=/next/ npm run build`
+reproduces the subpath build.
 
 ## Sources
 
-Content comes from `CV.pdf`. These were verified independently:
+Content comes from the CV. These were verified independently:
 
 | Claim | Source |
 | --- | --- |
 | ECCV 2026, `arXiv:2511.10629` | [arxiv.org/abs/2511.10629](https://arxiv.org/abs/2511.10629) |
-| #1 Hugging Face Daily Paper, 14 Nov 2025, 133 upvotes | HF daily-papers API |
+| #1 Hugging Face Daily Paper, 14 Nov 2025 | HF daily-papers API |
 | LUA code | [github.com/vaskers5/LUA](https://github.com/vaskers5/LUA) |
-| *Infrastructures* 2022, 27 citations | DOI `10.3390/infrastructures7060075` |
+| *Infrastructures* 2022 | DOI `10.3390/infrastructures7060075` |
 | Dr. Jinjin Gu at INSAIT | [insait.ai/dr-jinjin-gu](https://insait.ai/dr-jinjin-gu/) |
 
-LinkedIn (HTTP 999) and Google Scholar (CAPTCHA) both refuse automated fetches,
-so anything attributed to them comes from the CV.
-
-**On metrics:** there is deliberately no citation chart. That block works on a
-page with hundreds of citations; here it would take the weakest number on the
-page and put it in the middle of the screen. The six tiles carry the numbers
-that are actually strong instead.
+Company marks for Huawei and TradingView are from
+[simple-icons](https://github.com/simple-icons/simple-icons) (CC0); the others
+are monograms.
