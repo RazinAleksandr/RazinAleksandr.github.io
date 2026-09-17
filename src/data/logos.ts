@@ -16,6 +16,12 @@ export type Org = {
   href?: string;
   /** a wordmark, which carries the name and so replaces it */
   img?: string;
+  /**
+   * The file already carries the brand's own colours for a dark ground, so it
+   * is neither flattened to cream nor held back with the other marks — at .58
+   * a white wordmark reads grey and a red one reads brick.
+   */
+  brand?: boolean;
   /** a square mark — a crest or seal — which stands beside the name */
   emblem?: string;
   /** natural aspect ratio of `img`, for sizing by height */
@@ -29,5 +35,5 @@ export const orgs: Org[] = [
   { name: "Huawei", role: "AI Researcher", from: "2023.05", to: "2025.04", href: "https://www.huawei.com/", icon: "huawei" },
   { name: "Own startup", role: "Founder", from: "2025.04", to: "2025.09" },
   { name: "TradingView", role: "Senior ML Engineer", from: "2025.09", to: "2026.09", href: "https://www.tradingview.com/", icon: "tradingview" },
-  { name: "INSAIT", role: "Research Scientist", from: "2026.09", to: "now", href: "https://insait.ai/", img: "logos/insait.png", ratio: 370 / 132 },
+  { name: "INSAIT", role: "Research Scientist", from: "2026.09", to: "now", href: "https://insait.ai/", img: "logos/insait.png", ratio: 370 / 132, brand: true },
 ];

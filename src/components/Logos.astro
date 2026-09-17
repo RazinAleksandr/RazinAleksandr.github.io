@@ -27,9 +27,9 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
         orgs.map((o) => (
           <li aria-hidden={copy === 1 ? "true" : undefined}>
             <a class="stop" href={o.href} target="_blank" rel="noopener" tabindex={copy === 1 ? -1 : undefined}>
-              <span class="mark">
+              <span class:list={["mark", o.brand && "brand"]}>
                 {o.img ? (
-                  <img src={src(o.img)} alt={o.name} class={o.img.endsWith(".png") ? "raster" : ""} style={`aspect-ratio: ${o.ratio ?? 3}`} />
+                  <img src={src(o.img)} alt={o.name} class={!o.brand && o.img.endsWith(".png") ? "raster" : ""} style={`aspect-ratio: ${o.ratio ?? 3}`} />
                 ) : o.emblem ? (
                   <><img class="emblem" src={src(o.emblem)} alt="" style="aspect-ratio: 1" /><span class="name">{o.name}</span></>
                 ) : o.icon ? (
@@ -73,6 +73,8 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
     color: var(--ink); opacity: .58; transition: opacity .18s;
   }
   .stop:hover .mark, .stop:focus-visible .mark { opacity: 1; }
+  /* a mark in its own colours is never held back — that is the point of it */
+  .mark.brand { opacity: 1; }
   /* nothing to hover with on a touch screen — there the marks stay lit */
   @media (hover: none) { .mark { opacity: 1; } }
   .mark img { height: 26px; width: auto; }
