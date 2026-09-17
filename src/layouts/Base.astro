@@ -19,6 +19,11 @@ const home = current === "home";
 const withSide = home || current === "cv";
 const portrait = href("portrait-900.jpg");
 
+// The GA4 property the Jekyll site reported to, so the history continues in
+// the same place. Loaded in production only: a dev server left open all day
+// would otherwise file every reload as a visit.
+const GA = "G-QX68KTT819";
+
 // INSAIT picks the AI out of its own wordmark in red; the sidebar does the
 // same. Any other org name simply falls through and is set plainly.
 const [orgHead, orgTail] = profile.org.split("AI");
@@ -55,6 +60,21 @@ const nav = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+    {import.meta.env.PROD && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA}`}></script>
+        <script is:inline define:vars={{ GA }}>
+          // define:vars wraps this in a function, so gtag is published on
+          // window by hand — the usual snippet leaves it global, and anything
+          // added later will expect to find it there.
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function gtag() { window.dataLayer.push(arguments); };
+          window.gtag("js", new Date());
+          window.gtag("config", GA);
+        </script>
+      </>
+    )}
   </head>
 
   <body>
