@@ -3,7 +3,8 @@
  * starts over when it reaches the newest. `img` is a file in public/logos/;
  * `icon` is a brand mark from Icon.astro and `emblem` a square file in the
  * same folder, both set next to the name; with none of the three the name is
- * set in the display serif.
+ * set in the display serif. An `img` is drawn as it comes, so a file here is
+ * already coloured for the dark ground.
  *
  * Dates are stored `YYYY.MM` and printed `MM.YYYY`; `to` may be "now".
  */

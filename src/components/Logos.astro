@@ -29,7 +29,7 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
             <a class="stop" href={o.href} target="_blank" rel="noopener" tabindex={copy === 1 ? -1 : undefined}>
               <span class="mark">
                 {o.img ? (
-                  <img src={src(o.img)} alt={o.name} class={o.img.endsWith(".png") ? "raster" : ""} style={`aspect-ratio: ${o.ratio ?? 3}`} />
+                  <img src={src(o.img)} alt={o.name} style={`aspect-ratio: ${o.ratio ?? 3}`} />
                 ) : o.emblem ? (
                   <><img class="emblem" src={src(o.emblem)} alt="" style="aspect-ratio: 1" /><span class="name">{o.name}</span></>
                 ) : o.icon ? (
@@ -76,8 +76,6 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   /* nothing to hover with on a touch screen — there the marks stay lit */
   @media (hover: none) { .mark { opacity: 1; } }
   .mark img { height: 26px; width: auto; }
-  /* black-on-transparent wordmarks become cream on the dark ground */
-  .mark img.raster { filter: grayscale(1) invert(1) brightness(1.05); opacity: .92; }
   /* a crest is square, so it needs the extra height to carry a wordmark's
      weight; flattened to cream, like every other mark in the strip */
   .mark img.emblem { height: 30px; filter: brightness(0) invert(1); opacity: .92; }
