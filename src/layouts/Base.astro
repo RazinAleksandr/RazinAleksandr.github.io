@@ -24,10 +24,6 @@ const portrait = href("portrait-900.jpg");
 // would otherwise file every reload as a visit.
 const GA = "G-QX68KTT819";
 
-// INSAIT picks the AI out of its own wordmark in red; the sidebar does the
-// same. Any other org name simply falls through and is set plainly.
-const [orgHead, orgTail] = profile.org.split("AI");
-const orgSplit = orgTail !== undefined;
 
 const nav = [
   ["home", "Profile", href("")],
@@ -92,7 +88,7 @@ const nav = [
           <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
         </a>
         <h1 class="name">{profile.name}</h1>
-        <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{orgSplit ? <>{orgHead}<span class="ai">AI</span>{orgTail}</> : profile.org}</a></p>
+        <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a></p>
         <p class="where label">{profile.location}, Bulgaria</p>
 
         <ul class="contacts">
@@ -145,8 +141,6 @@ const nav = [
   .role { font-size: 17px; color: var(--ink-2); }
   .role a { color: var(--ink); }
   .role a:hover { color: var(--rose); }
-  /* the red INSAIT sets its own AI in — it holds through the link's hover */
-  .role .ai { color: #ff5151; }
   .where { margin-top: 2px; }
 
   .contacts { margin-top: 22px; display: grid; gap: 8px; }
