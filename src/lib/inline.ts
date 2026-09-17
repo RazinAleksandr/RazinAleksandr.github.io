@@ -2,7 +2,7 @@
  * Inline-only markdown for short strings in data files (news, blurbs).
  *
  * Supports **bold**, *italic*, `code` and [text](href). Deliberately tiny —
- * this is for one-line copy, not documents; blog posts go through MDX.
+ * this is for one-line copy, not documents.
  * Input is escaped first, so data-file text can never inject markup.
  */
 

@@ -8,14 +8,14 @@ const pdf = `${base}${profile.cv.file}`.replace(/\/{2,}/g, "/");
 ---
 
 <Base current="cv" title={`CV — ${profile.name}`} description={`Curriculum vitae of ${profile.name} (PDF).`}>
-  <section class="page">
-    <div class="head">
-      <h1>Curriculum vitae</h1>
-      <div class="side">
+  <section class="section cv">
+    <h2>
+      Curriculum vitae
+      <span class="side">
         <span class="mono">Updated {profile.cv.updated}</span>
         <a class="dl" href={pdf} download><Icon name="download" size={14} /> Download PDF</a>
-      </div>
-    </div>
+      </span>
+    </h2>
     <object class="pdf" data={`${pdf}#view=FitH`} type="application/pdf" aria-label="CV as PDF">
       <p class="fallback">Your browser does not preview PDFs here — <a href={pdf} target="_blank" rel="noopener">open the CV</a> in a new tab.</p>
     </object>
@@ -23,18 +23,18 @@ const pdf = `${base}${profile.cv.file}`.replace(/\/{2,}/g, "/");
 </Base>
 
 <style>
-  .page { padding-block: 0 40px; }
-  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
-  h1 { font-size: clamp(32px, 4vw, 44px); line-height: 1; }
-  .side { display: flex; align-items: center; gap: 18px; }
+  .cv { padding-top: 0; }
+  .cv > h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+  .side { display: inline-flex; align-items: center; gap: 16px; }
   .dl {
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 500;
+    font-family: var(--serif); font-size: 14px; font-weight: 500;
     color: var(--bg-0); background: var(--accent);
-    padding: 9px 16px; border-radius: 999px;
+    padding: 8px 15px; border-radius: 999px;
     transition: background .15s;
   }
   .dl:hover { background: var(--rose); color: var(--bg-0); }
-  .pdf { display: block; width: 100%; height: min(1100px, calc(100vh - 200px)); border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+  .pdf { display: block; width: 100%; height: min(1180px, calc(100vh - 170px)); border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
   .fallback { padding: 24px; color: var(--ink-2); }
+  @media (max-width: 880px) { .pdf { height: min(900px, calc(100vh - 120px)); } }
 </style>

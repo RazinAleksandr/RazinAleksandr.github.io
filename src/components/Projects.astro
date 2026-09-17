@@ -1,7 +1,8 @@
 ---
 /**
- * Repositories as small cards. Star counts come from the GitHub API at build
- * time and fall back to the snapshot in projects.ts when it is unreachable.
+ * Selected work as cards. Repositories link to GitHub and carry a star count
+ * fetched at build time, falling back to the snapshot in projects.ts when the
+ * API is unreachable; anything else carries its standing instead.
  */
 import { projects } from "../data/projects";
 import { liveStars } from "../lib/stars";
@@ -11,8 +12,10 @@ const stars = await liveStars();
 const owner = (p: (typeof projects)[number]) => p.owner ?? "RazinAleksandr";
 const list = projects.map((p) => ({
   ...p,
-  url: p.href ?? `https://github.com/${owner(p)}/${p.repo}`,
-  count: p.owner ? p.stars : (stars[p.repo] ?? p.stars),
+  url: p.repo ? `https://github.com/${owner(p)}/${p.repo}` : p.href!,
+  // a repo under someone else's account is not in our star map
+  count: p.repo ? (p.owner ? p.stars : (stars[p.repo] ?? p.stars)) ?? 0 : 0,
+  foot: p.repo ? `${owner(p)}/${p.repo} · ${p.lang}` : p.meta,
 }));
 ---
 
@@ -20,14 +23,15 @@ const list = projects.map((p) => ({
   <h2>Projects</h2>
   <ul class="grid">
     {list.map((p) => (
-      <li>
+      <li class:list={[p.wide && "wide"]}>
         <a class="card" href={p.url} target="_blank" rel="noopener">
           <span class="head">
             <span class="name">{p.name}</span>
-            {p.count > 0 && <span class="stars mono"><Icon name="star" size={11} /> {p.count}</span>}
+            {p.count > 0 && <span class="tag mono"><Icon name="star" size={11} /> {p.count}</span>}
+            {p.standing && <span class="tag medal mono">{p.standing}</span>}
           </span>
           <span class="blurb">{p.blurb}</span>
-          <span class="meta mono">{owner(p)}/{p.repo} · {p.lang}</span>
+          <span class="meta mono">{p.foot}</span>
         </a>
       </li>
     ))}
@@ -36,6 +40,7 @@ const list = projects.map((p) => ({
 
 <style>
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .wide { grid-column: 1 / -1; }
   .card {
     display: grid; gap: 6px; height: 100%;
     padding: 16px 18px;
@@ -47,8 +52,18 @@ const list = projects.map((p) => ({
   .head { display: flex; align-items: baseline; gap: 10px; }
   .name { font-size: 19px; font-weight: 500; }
   .card:hover .name { color: var(--rose); }
-  .stars { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--accent); white-space: nowrap; }
+  .tag { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--accent); white-space: nowrap; }
+  /* a standing is a claim, so it is set apart from the running metadata */
+  .medal {
+    color: var(--ink);
+    padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--line-2); background: rgba(123, 92, 255, .16);
+  }
   .blurb { font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
   .meta { font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .head { flex-wrap: wrap; gap: 6px 10px; }
+    .tag { margin-left: 0; }
+  }
 </style>

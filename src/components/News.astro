@@ -21,4 +21,6 @@ import { inlineMd } from "../lib/inline";
   .date { color: var(--accent); }
   .body { font-size: 17px; color: var(--ink-2); }
   .body :global(strong) { color: var(--ink); }
+  /* emphasis inside a link belongs to the link, not to the running text */
+  .body :global(a strong) { color: inherit; }
 </style>

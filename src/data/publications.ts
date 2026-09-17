@@ -22,8 +22,7 @@ export type Publication = {
 
 export const publications: Publication[] = [
   {
-    title:
-      "One Small Step in Latent, One Giant Leap for Pixels: Fast Latent Upscale Adapter for Your Diffusion Models",
+    title: "LUA: Latent Upscaling Adapter for Diffusion-Based Image Synthesis",
     authors: [
       { name: "Aleksandr Razin", me: true },
       { name: "Danil Kazantsev" },
@@ -42,8 +41,7 @@ export const publications: Publication[] = [
       { label: "Hugging Face", href: "https://huggingface.co/papers/2511.10629" },
     ],
     bibtex: `@inproceedings{razin2026lua,
-  title     = {One Small Step in Latent, One Giant Leap for Pixels:
-               Fast Latent Upscale Adapter for Your Diffusion Models},
+  title     = {LUA: Latent Upscaling Adapter for Diffusion-Based Image Synthesis},
   author    = {Razin, Aleksandr and Kazantsev, Danil and Makarov, Ilya},
   booktitle = {European Conference on Computer Vision (ECCV)},
   year      = {2026},

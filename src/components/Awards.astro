@@ -1,0 +1,33 @@
+---
+/**
+ * Awards on the same rhythm as the news: the year in the left column, the
+ * award and what it was worth in the right one.
+ */
+import { awards } from "../data/awards";
+---
+
+<section class="section" id="awards">
+  <h2>Awards</h2>
+  <ul class="awards">
+    {awards.map((a) => (
+      <li>
+        <span class="mono year">{a.year}</span>
+        <span class="body">
+          {a.href
+            ? <a href={a.href} target="_blank" rel="noopener"><strong>{a.title}</strong></a>
+            : <strong>{a.title}</strong>}
+          {" — "}{a.detail}
+        </span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .awards { display: grid; gap: 10px; }
+  .awards li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+  .year { color: var(--accent); }
+  .body { font-size: 17px; color: var(--ink-2); }
+  /* emphasis inside a link belongs to the link, not to the running text */
+  .body a strong { color: inherit; }
+</style>

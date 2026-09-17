@@ -1,15 +1,22 @@
 ---
 /**
  * Where I've worked as a running strip: oldest on the left, newest on the
- * right, starting over after the newest. Each stop is the mark, the name and
- * the dates. It pauses under the pointer; with reduced motion it wraps.
+ * right, starting over after the newest. Each stop is the mark, the dates as
+ * MM.YYYY — MM.YYYY, and the title I held there. It pauses under the pointer;
+ * with reduced motion it wraps.
  */
 import { orgs } from "../data/logos";
 import Icon from "./Icon.astro";
 
 const base = import.meta.env.BASE_URL;
 const src = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
-const when = (o: (typeof orgs)[number]) => `${o.from} — ${o.to}`;
+
+/** "2025.04" → "04.2025"; "now" and anything else pass through */
+const md = (d: string) => {
+  const m = /^(\d{4})\.(\d{2})$/.exec(d);
+  return m ? `${m[2]}.${m[1]}` : d;
+};
+const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
 ---
 
 <section class="section" aria-label="Where I've worked">
@@ -22,14 +29,17 @@ const when = (o: (typeof orgs)[number]) => `${o.from} — ${o.to}`;
             <a class="stop" href={o.href} target="_blank" rel="noopener" tabindex={copy === 1 ? -1 : undefined}>
               <span class="mark">
                 {o.img ? (
-                  <img src={src(o.img)} alt="" class={o.img.endsWith(".png") ? "raster" : ""} style={`aspect-ratio: ${o.ratio ?? 3}`} />
+                  <img src={src(o.img)} alt={o.name} class={o.img.endsWith(".png") ? "raster" : ""} style={`aspect-ratio: ${o.ratio ?? 3}`} />
+                ) : o.emblem ? (
+                  <><img class="emblem" src={src(o.emblem)} alt="" style="aspect-ratio: 1" /><span class="name">{o.name}</span></>
                 ) : o.icon ? (
                   <><Icon name={o.icon} size={22} /><span class="name">{o.name}</span></>
                 ) : (
                   <span class="word">{o.name}</span>
                 )}
               </span>
-              <span class="mono when">{when(o)}{o.role && <> · {o.role}</>}</span>
+              <span class="mono when">{span(o)}</span>
+              <span class="role">{o.role}</span>
             </a>
           </li>
         ))
@@ -41,29 +51,157 @@ const when = (o: (typeof orgs)[number]) => `${o.from} — ${o.to}`;
 <style>
   .section { padding-top: 34px; }
   .label { margin-bottom: 18px; }
+  /* a real scroll container: the drift below is just scrollLeft, so the wheel,
+     a trackpad swipe, a drag and a swipe on glass all work on the same axis */
   .marquee {
-    overflow: hidden;
+    overflow-x: auto;
+    scroll-behavior: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    cursor: grab;
     -webkit-mask: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
             mask: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   }
-  .track { display: flex; width: max-content; gap: 64px; padding-right: 64px; animation: run 40s linear infinite; }
-  .marquee:hover .track { animation-play-state: paused; }
-  @keyframes run { to { transform: translateX(-50%); } }
+  .marquee::-webkit-scrollbar { display: none; }
+  .marquee.dragging { cursor: grabbing; }
+  .track { display: flex; width: max-content; gap: 64px; padding-right: 64px; }
 
-  .stop { display: grid; gap: 8px; justify-items: start; color: var(--ink); white-space: nowrap; }
-  .mark { height: 26px; display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
+  .stop { display: grid; gap: 7px; justify-items: start; color: var(--ink); white-space: nowrap; }
+  /* every mark sits back until the pointer picks that stop out of the strip */
+  .mark {
+    height: 30px; display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ink); opacity: .58; transition: opacity .18s;
+  }
+  .stop:hover .mark, .stop:focus-visible .mark { opacity: 1; }
+  /* nothing to hover with on a touch screen — there the marks stay lit */
+  @media (hover: none) { .mark { opacity: 1; } }
   .mark img { height: 26px; width: auto; }
   /* black-on-transparent wordmarks become cream on the dark ground */
   .mark img.raster { filter: grayscale(1) invert(1) brightness(1.05); opacity: .92; }
+  /* a crest is square, so it needs the extra height to carry a wordmark's
+     weight; flattened to cream, like every other mark in the strip */
+  .mark img.emblem { height: 30px; filter: brightness(0) invert(1); opacity: .92; }
   .mark svg { color: var(--ink); }
   .name { font-family: var(--serif); font-weight: 600; font-size: 20px; }
   .word { font-size: 22px; line-height: 26px; }
   .when { color: var(--muted); }
-  .stop:hover .when { color: var(--rose); }
+  /* an empty role still holds its line, so every mark sits on the same baseline */
+  .role { font-size: 15px; line-height: 1.2; color: var(--ink-2); min-height: 1.2em; }
 
   @media (prefers-reduced-motion: reduce) {
-    .marquee { mask: none; -webkit-mask: none; }
-    .track { animation: none; width: auto; flex-wrap: wrap; gap: 22px 40px; padding-right: 0; }
+    .marquee { mask: none; -webkit-mask: none; overflow-x: visible; cursor: auto; }
+    .track { width: auto; flex-wrap: wrap; gap: 26px 44px; padding-right: 0; }
     .track li[aria-hidden="true"] { display: none; }
   }
 </style>
+
+<script>
+  /**
+   * The strip drifts by its own scroll position rather than a transform, so
+   * everything the browser already knows how to scroll — the wheel, a trackpad
+   * swipe, a drag, a swipe on glass, the keyboard walking the links — moves it
+   * too, and the drift gets out of the way while you are steering.
+   *
+   * The list is rendered twice, so one period is half the scrollable width.
+   * Scrolling is kept inside [0, period): crossing either end and stepping back
+   * by a period lands on the identical frame, which is what makes it endless in
+   * both directions — scrollLeft itself can never go negative.
+   */
+  const box = document.querySelector<HTMLElement>(".marquee");
+  const track = box?.querySelector<HTMLElement>(".track");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (box && track && !reduced) {
+    const PERIOD_SECONDS = 24;   // time to cross one copy, as the CSS took
+    const RESUME = 1600;         // ms of stillness after a touch before drifting on
+    const EDGE = 1;              // px of slack that keeps the two wraps apart
+
+    let held = 0;                // reasons to stay still: pointer, focus, drag, touch
+    const hold = () => held++;
+    const release = () => (held = Math.max(0, held - 1));
+
+    box.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && hold());
+    box.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && release());
+    box.addEventListener("focusin", hold);
+    box.addEventListener("focusout", release);
+
+    let touching = false, touchTimer = 0;
+    box.addEventListener("touchstart", () => {
+      clearTimeout(touchTimer);
+      if (!touching) { touching = true; hold(); }
+    }, { passive: true });
+    box.addEventListener("touchend", () => {
+      touchTimer = window.setTimeout(() => { touching = false; release(); }, RESUME);
+    }, { passive: true });
+
+    // drag with the mouse only: on glass the browser's own swipe and momentum win
+    let dragging = false, startX = 0, startLeft = 0, moved = false;
+
+    box.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragging = true; moved = false;
+      startX = e.clientX; startLeft = box.scrollLeft;
+      box.setPointerCapture(e.pointerId);
+      box.classList.add("dragging");
+      hold();
+      e.preventDefault();          // no native link or image drag, no text selection
+    });
+    box.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 3) moved = true;
+      box.scrollLeft = startLeft - dx;
+    });
+    const drop = () => {
+      if (!dragging) return;
+      dragging = false;
+      box.classList.remove("dragging");
+      release();
+    };
+    box.addEventListener("pointerup", drop);
+    box.addEventListener("pointercancel", drop);
+    // a drag that happens to end on a link must not also follow it
+    box.addEventListener("click", (e) => {
+      if (moved) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    let raf = 0, last = 0, running = false;
+
+    function frame(now: number) {
+      if (!running) return;
+      const dt = Math.min(now - last, 100);   // coming back to the tab should not lurch
+      last = now;
+
+      const period = track!.scrollWidth / 2;
+      if (period > box!.clientWidth) {
+        if (!held) box!.scrollLeft += (period / PERIOD_SECONDS) * (dt / 1000);
+
+        // The two copies are identical, so these seams are invisible. A drag in
+        // flight is measured from startLeft, so that moves with the wrap.
+        //
+        // The band is [EDGE, period + EDGE]: a step of exactly one period from
+        // either end lands inside it. Were the two ends a period apart instead,
+        // each wrap would trip the other one and the strip would sit there
+        // flipping between them every frame.
+        if (box!.scrollLeft > period + EDGE) { box!.scrollLeft -= period; startLeft -= period; }
+        else if (box!.scrollLeft < EDGE) { box!.scrollLeft += period; startLeft += period; }
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    function start() {
+      if (running || document.hidden) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0 });
+    io.observe(box);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+  }
+</script>

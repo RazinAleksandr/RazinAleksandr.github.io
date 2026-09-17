@@ -1,10 +1,18 @@
 ---
 /**
- * The portrait as a loop of two states: noise, as a latent before sampling,
- * and the photograph, as its decode. The noise is drawn between the page's
- * ground and its lavender so it belongs to the page.
+ * The portrait run through a diffusion process, the way the DDPM figure shows
+ * it: the photograph is noised forward to pure Gaussian noise, then sampled
+ * back. The intermediate frames are the real thing — per pixel,
  *
- * Noise (hold) → denoise → photograph (hold) → back to noise, about seven
+ *     x_t = sqrt(a_bar) · x_0 + sqrt(1 - a_bar) · e,   e ~ N(0, I)
+ *
+ * with a_bar from the cosine schedule — so the face stays legible through the
+ * grain on the way out and comes back out of it, rather than cross-fading.
+ * A timestep counter runs alongside.
+ *
+ * Whoever arrives sees the photograph first: the clock only starts once it is
+ * decoded and on screen, and the first hold is the longest. From there,
+ * t=0 → t=1000 → t=0 — photograph, forward, noise, the way back — about eight
  * seconds a loop. It pauses off-screen and in a hidden tab, and with reduced
  * motion the photograph is simply there.
  */
@@ -15,6 +23,7 @@ const { src, alt } = Astro.props;
 <div class="portrait" id="portrait">
   <img src={src} alt={alt} id="portraitImg" width="900" height="900" fetchpriority="high" />
   <canvas id="portraitCv" aria-hidden="true"></canvas>
+  <span class="step mono" id="portraitT" aria-hidden="true"></span>
 </div>
 
 <style>
@@ -30,113 +39,173 @@ const { src, alt } = Astro.props;
     object-fit: cover;
   }
   .portrait canvas { opacity: 0; }
+
+  /* the timestep, as a sampler would log it */
+  .step {
+    position: absolute; left: 10px; bottom: 9px;
+    padding: 2px 7px; border-radius: 5px;
+    font-size: 10.5px; letter-spacing: .04em;
+    color: var(--ink); background: rgba(18, 10, 28, .58);
+    backdrop-filter: blur(3px);
+    opacity: 0; transition: opacity .35s;
+    pointer-events: none;
+  }
+  /* the thumbnail on narrow screens has no room for a readout */
+  @media (max-width: 880px) { .step { display: none; } }
 </style>
 
 <script>
   const box = document.getElementById("portrait");
   const img = document.getElementById("portraitImg") as HTMLImageElement | null;
   const cv = document.getElementById("portraitCv") as HTMLCanvasElement | null;
+  const tag = document.getElementById("portraitT");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (box && img && cv && !reduced) {
-    const ctx = cv.getContext("2d")!;
-    const GRAIN = 2;              // css px per noise cell
-    const INK = [18, 10, 28], PAPER = [200, 181, 255];
+  if (box && img && cv && tag && !reduced) {
+    const ctx = cv.getContext("2d", { alpha: false })!;
 
-    // timeline, ms
-    const NOISE = 1400, DENOISE = 2200, PHOTO = 3000, RENOISE = 700;
-    const LOOP = NOISE + DENOISE + PHOTO + RENOISE;
+    // the sampler's own resolution — a latent grid, not the photograph's
+    const MAX = 400;
+    const STEPS = 1000;          // timesteps the counter walks, as in DDPM
+    const REGRAIN = 45;          // ms between fresh noise draws (~22 fps)
 
-    const ease = (v: number) => { v = Math.max(0, Math.min(1, v)); return v * v * (3 - 2 * v); };
+    // timeline, ms: the photograph, the forward pass, pure noise, the way back
+    const PHOTO = 2400, FWD = 1800, NOISE = 600, REV = 3200;
+    const LOOP = PHOTO + FWD + NOISE + REV;
+    // on arrival the photograph holds this much longer than it does in the loop
+    const LEAD = 1800;
 
-    let side = 0;
-    let noise: HTMLCanvasElement | null = null;
-    let nctx: CanvasRenderingContext2D | null = null;
-    let data: ImageData | null = null;
+    /**
+     * How fast the walk moves along the schedule. Not a straight line and not
+     * a smoothstep: this one is quick at the two ends and lingers in the
+     * middle, which is where the face still reads through the grain — the part
+     * worth looking at.
+     */
+    const A = 0.75;
+    const ramp = (v: number) => {
+      v = v < 0 ? 0 : v > 1 ? 1 : v;
+      return v + (A * Math.sin(2 * Math.PI * v)) / (2 * Math.PI);
+    };
 
-    function size() {
+    // cosine schedule (Nichol & Dhariwal): a_bar(s), s the fraction of the way
+    // to pure noise. 1 at s=0, 0 at s=1.
+    const S = 0.008;
+    const f = (s: number) => Math.cos(((s + S) / (1 + S)) * Math.PI / 2) ** 2;
+    const F0 = f(0);
+    const abar = (s: number) => Math.max(0, f(s) / F0);
+
+    // xorshift32 + a Gaussian table: a million draws a frame, none of them
+    // Math.random
+    const LUT = new Float32Array(8192);
+    for (let i = 0; i < LUT.length; i++) {
+      // Box–Muller, once, at build-up
+      const u = (i + 1) / (LUT.length + 1);
+      const v = ((i * 2654435761) % LUT.length) / LUT.length;
+      LUT[i] = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+    let seed = 0x9e3779b9 >>> 0;
+    const rnd = () => {
+      seed ^= seed << 13; seed >>>= 0;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;  seed >>>= 0;
+      return seed;
+    };
+
+    let side = 0;                       // working resolution, px
+    let x0: Uint8ClampedArray | null = null;   // the photograph at that size
+    let out: ImageData | null = null;          // the frame being written
+    let ready = false;
+
+    /** (re)build the working buffers and cover-crop the photograph into them */
+    function build() {
       const css = box!.clientWidth;
-      if (!css) return false;
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      const px = Math.round(css * dpr);
-      if (px !== cv!.width) { cv!.width = px; cv!.height = px; }
-      const n = Math.max(24, Math.round(css / GRAIN));
-      if (n !== side) {
-        side = n;
-        noise = document.createElement("canvas");
-        noise.width = n; noise.height = n;
-        nctx = noise.getContext("2d")!;
-        data = nctx.createImageData(n, n);
-      }
+      if (!css || !img!.complete || !img!.naturalWidth) return false;
+      const n = Math.max(64, Math.min(MAX, Math.round(css * Math.min(devicePixelRatio || 1, 2))));
+      if (n === side && ready) return true;
+
+      side = n;
+      cv!.width = n; cv!.height = n;
+
+      const src = document.createElement("canvas");
+      src.width = n; src.height = n;
+      const sctx = src.getContext("2d", { willReadFrequently: true })!;
+      const iw = img!.naturalWidth, ih = img!.naturalHeight;
+      const k = Math.max(n / iw, n / ih);           // cover
+      sctx.drawImage(img!, (n - iw * k) / 2, (n - ih * k) / 2, iw * k, ih * k);
+
+      x0 = sctx.getImageData(0, 0, n, n).data;
+      out = ctx.createImageData(n, n);
+      const p = out.data;
+      for (let i = 3; i < p.length; i += 4) p[i] = 255;
+      ready = true;
       return true;
     }
 
-    // Gaussian-ish grey noise between ink and paper — three uniforms summed,
-    // which is enough bell for the eye.
-    function drawNoise() {
-      const p = data!.data;
-      for (let i = 0; i < p.length; i += 4) {
-        const t = (Math.random() + Math.random() + Math.random()) / 3;
-        p[i]     = INK[0] + (PAPER[0] - INK[0]) * t;
-        p[i + 1] = INK[1] + (PAPER[1] - INK[1]) * t;
-        p[i + 2] = INK[2] + (PAPER[2] - INK[2]) * t;
-        p[i + 3] = 255;
+    /**
+     * One draw of x_t. Pixels are taken to [-1, 1], mixed with fresh noise at
+     * the schedule's weights, and written back — the grain lands on the image,
+     * not over it.
+     */
+    function draw(ab: number) {
+      const a = Math.sqrt(ab), b = Math.sqrt(1 - ab) * 127.5;
+      const src = x0!, dst = out!.data;
+      for (let i = 0; i < dst.length; i += 4) {
+        dst[i]     = a * (src[i]     - 127.5) + b * LUT[rnd() & 8191] + 127.5;
+        dst[i + 1] = a * (src[i + 1] - 127.5) + b * LUT[rnd() & 8191] + 127.5;
+        dst[i + 2] = a * (src[i + 2] - 127.5) + b * LUT[rnd() & 8191] + 127.5;
       }
-      nctx!.putImageData(data!, 0, 0);
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(noise!, 0, 0, cv!.width, cv!.height);
+      ctx.putImageData(out!, 0, 0);
     }
 
-    let raf = 0;
-    let t0 = 0;
-    let running = false;
-    let lastNoiseAt = -1;
+    let raf = 0, t0 = 0, running = false, lastDraw = -1, lastT = -1;
 
     function frame(now: number) {
       if (!running) return;
-      if (!size()) { raf = requestAnimationFrame(frame); return; }
-      const t = (now - t0) % LOOP;
+      if (!build()) { raf = requestAnimationFrame(frame); return; }
+      if (!t0) t0 = now;                       // first frame with the photo ready
+      const e = now - t0;
+      const t = e < LEAD ? 0 : (e - LEAD) % LOOP;
 
-      let noiseA = 0, photoBlur = 0, photoA = 1;
-      if (t < NOISE) {
-        noiseA = 1; photoA = 0;
-      } else if (t < NOISE + DENOISE) {
-        const p = ease((t - NOISE) / DENOISE);
-        noiseA = 1 - ease(Math.min(1, p * 1.25));
-        photoA = ease(Math.min(1, p * 1.6));
-        photoBlur = (1 - p) * 22;
-      } else if (t < NOISE + DENOISE + PHOTO) {
-        noiseA = 0; photoA = 1;
+      // s: how far along the road to pure noise this instant is
+      let s: number;
+      if (t < PHOTO) s = 0;
+      else if (t < PHOTO + FWD) s = ramp((t - PHOTO) / FWD);
+      else if (t < PHOTO + FWD + NOISE) s = 1;
+      else s = 1 - ramp((t - PHOTO - FWD - NOISE) / REV);
+
+      if (s <= 0) {
+        // the photograph itself, at its own resolution — nothing to compute
+        cv!.style.opacity = "0";
+        tag!.style.opacity = "0";
       } else {
-        const p = ease((t - NOISE - DENOISE - PHOTO) / RENOISE);
-        noiseA = p; photoA = 1; photoBlur = p * 10;
+        if (now - lastDraw > REGRAIN) { draw(abar(s)); lastDraw = now; }
+        // the last sliver hands off to the full-resolution <img> underneath
+        cv!.style.opacity = s < 0.06 ? (s / 0.06).toFixed(3) : "1";
+        tag!.style.opacity = "1";
+        const step = Math.round(s * STEPS);
+        if (step !== lastT) { tag!.textContent = `t = ${String(step).padStart(4, "0")}`; lastT = step; }
       }
-
-      // the grain flickers at ~24 fps, not 60 — calmer, and cheaper
-      if (noiseA > 0 && now - lastNoiseAt > 40) { drawNoise(); lastNoiseAt = now; }
-      cv!.style.opacity = noiseA.toFixed(3);
-      img!.style.opacity = photoA.toFixed(3);
-      img!.style.filter = photoBlur > 0.3 ? `blur(${photoBlur.toFixed(1)}px)` : "";
 
       raf = requestAnimationFrame(frame);
     }
 
     function start() {
-      if (running) return;
+      if (running || document.hidden) return;
       running = true;
-      t0 = performance.now();
+      t0 = 0;
+      lastDraw = -1;
       raf = requestAnimationFrame(frame);
     }
     function stop() {
       running = false;
       cancelAnimationFrame(raf);
       cv!.style.opacity = "0";
-      img!.style.opacity = "1";
-      img!.style.filter = "";
+      tag!.style.opacity = "0";
     }
 
-    const io = new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? start() : stop()), { threshold: 0.2 });
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.2 });
     io.observe(box);
     document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+    if (!img.complete) img.addEventListener("load", () => { ready = false; });
   }
 </script>

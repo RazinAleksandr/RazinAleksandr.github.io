@@ -18,7 +18,7 @@ export const profile = {
    * Two short paragraphs, inline markdown, no numbers.
    */
   intro: [
-    "I'm Aleksandr Razin, a Research Scientist at [INSAIT](https://insait.ai/) and an ELLIS PhD student, working with [Dr. Jinjin Gu](https://insait.ai/dr-jinjin-gu/). My research focuses on **visual agents and generative world models for embodied AI.**",
+    "I'm Aleksandr Razin, a Research Scientist at [INSAIT](https://insait.ai/) and an ELLIS PhD student, advised by [Dr. Jinjin Gu](https://insait.ai/dr-jinjin-gu/) (INSAIT) and [Prof. Marc Pollefeys](https://people.inf.ethz.ch/pomarc/) (ETH Zürich). My research focuses on **visual agents and generative world models for embodied AI.**",
     "Prior to this, I worked on video restoration and diffusion models at Huawei, founded a computer-vision startup, and built the agentic copilot at TradingView. I earned my M.Sc. in Machine Learning at ITMO University.",
   ],
 
@@ -27,8 +27,9 @@ export const profile = {
   links: {
     github: "https://github.com/RazinAleksandr",
     linkedin: "https://www.linkedin.com/in/a-razin/",
-    scholar: "https://scholar.google.com/citations?user=-AsUnsgAAAAJ",
-    telegram: "https://t.me/Razin_Aleks",
+    // sorted newest first, not by citation count
+    scholar: "https://scholar.google.com/citations?view_op=list_works&hl=en&user=-AsUnsgAAAAJ&sortby=pubdate",
+    telegram: "https://t.me/xalexrazin",
   },
 
   cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "July 2026" },

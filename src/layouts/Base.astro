@@ -14,20 +14,25 @@ const {
 const base = import.meta.env.BASE_URL;
 const href = (p: string) => `${base}${p}`.replace(/\/{2,}/g, "/");
 const home = current === "home";
+// the profile column stays beside the CV too, so the CV reads as a panel of
+// this page rather than a place you navigate away to
+const withSide = home || current === "cv";
 const portrait = href("portrait-900.jpg");
+
+// INSAIT picks the AI out of its own wordmark in red; the sidebar does the
+// same. Any other org name simply falls through and is set plainly.
+const [orgHead, orgTail] = profile.org.split("AI");
+const orgSplit = orgTail !== undefined;
 
 const nav = [
   ["home", "Profile", href("")],
   ["news", "News", home ? "#news" : href("#news")],
+  ["awards", "Awards", home ? "#awards" : href("#awards")],
   ["papers", "Papers", home ? "#papers" : href("#papers")],
   ["projects", "Projects", home ? "#projects" : href("#projects")],
   ["cv", "CV", href("cv")],
-  ["blog", "Blog", href("blog")],
 ];
 
-const favicon =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E" +
-  "%3Crect width='32' height='32' rx='7' fill='%23120a1c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8b5ff'/%3E%3C/svg%3E";
 ---
 
 <!doctype html>
@@ -38,7 +43,8 @@ const favicon =
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#120a1c" />
-    <link rel="icon" href={favicon} />
+    <link rel="icon" type="image/png" sizes="32x32" href={href("icon-32.png")} />
+    <link rel="apple-touch-icon" sizes="180x180" href={href("icon-180.png")} />
     <link rel="sitemap" href={href("sitemap-index.xml")} />
     <meta property="og:type" content="profile" />
     <meta property="og:title" content={title} />
@@ -60,13 +66,13 @@ const favicon =
       </nav>
     </header>
 
-    <div class:list={["wrap", "layout", !home && "single"]}>
-      {home && <aside class="side">
+    <div class:list={["wrap", "layout", !withSide && "single"]}>
+      {withSide && <aside class="side">
         <a class="photo" href={href("")} aria-label="Home">
           <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
         </a>
         <h1 class="name">{profile.name}</h1>
-        <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a></p>
+        <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{orgSplit ? <>{orgHead}<span class="ai">AI</span>{orgTail}</> : profile.org}</a></p>
         <p class="where label">{profile.location}, Bulgaria</p>
 
         <ul class="contacts">
@@ -119,6 +125,8 @@ const favicon =
   .role { font-size: 17px; color: var(--ink-2); }
   .role a { color: var(--ink); }
   .role a:hover { color: var(--rose); }
+  /* the red INSAIT sets its own AI in — it holds through the link's hover */
+  .role .ai { color: #ff5151; }
   .where { margin-top: 2px; }
 
   .contacts { margin-top: 22px; display: grid; gap: 8px; }
