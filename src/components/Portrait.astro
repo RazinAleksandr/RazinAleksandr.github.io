@@ -70,10 +70,11 @@ const { src, alt } = Astro.props;
     const REGRAIN = 45;          // ms between fresh noise draws (~22 fps)
 
     // timeline, ms: the photograph, the forward pass, pure noise, the way back
-    const PHOTO = 2400, FWD = 1800, NOISE = 600, REV = 3200;
+    const PHOTO = 1500, FWD = 1800, NOISE = 600, REV = 3200;
     const LOOP = PHOTO + FWD + NOISE + REV;
-    // on arrival the photograph holds this much longer than it does in the loop
-    const LEAD = 1800;
+    // on arrival the photograph holds this much longer than it does in the loop:
+    // long enough to be seen as a photograph, short enough not to feel stalled
+    const LEAD = 500;
 
     /**
      * How fast the walk moves along the schedule. Not a straight line and not

@@ -90,10 +90,13 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   /* an empty role still holds its line, so every mark sits on the same baseline */
   .role { font-size: 15px; line-height: 1.2; color: var(--ink-2); min-height: 1.2em; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .marquee { mask: none; -webkit-mask: none; overflow-x: visible; cursor: auto; }
-    .track { width: auto; flex-wrap: wrap; gap: 26px 44px; padding-right: 0; }
+  /* Where the strip does not drift — reduced motion, or a touch screen, where
+     the drift fought the finger — one copy is enough. It stays a strip either
+     way: still scrollable, just pushed by hand. Turning it into a wrapped
+     block instead left nothing to move at all, which reads as broken. */
+  @media (prefers-reduced-motion: reduce), (hover: none) {
     .track li[aria-hidden="true"] { display: none; }
+    .track { padding-right: 0; }
   }
 </style>
 
@@ -112,53 +115,76 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   const box = document.querySelector<HTMLElement>(".marquee");
   const track = box?.querySelector<HTMLElement>(".track");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // On a touch screen the drift and the finger fight over the same scroll
+  // offset, and the finger loses: a swipe dies under the next frame's write.
+  // There the strip simply doesn't drift — it is swiped, which is what a
+  // horizontal list on a phone wants anyway.
+  const coarse = matchMedia("(hover: none)").matches;
 
-  if (box && track && !reduced) {
+  if (box && track && !reduced && !coarse) {
     const PERIOD_SECONDS = 24;   // time to cross one copy, as the CSS took
     const RESUME = 1600;         // ms of stillness after a touch before drifting on
     const EDGE = 1;              // px of slack that keeps the two wraps apart
 
-    let held = 0;                // reasons to stay still: pointer, focus, drag, touch
-    const hold = () => held++;
-    const release = () => (held = Math.max(0, held - 1));
+    // Reasons to stay still, each its own flag rather than one counter: a
+    // counter only has to miss a single release — a touchcancel instead of a
+    // touchend, a focusout that never comes — and the strip is stuck for good.
+    let hovering = false, focused = false, dragging = false, touching = false;
+    const held = () => hovering || focused || dragging || touching;
 
-    box.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && hold());
-    box.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && release());
-    box.addEventListener("focusin", hold);
-    box.addEventListener("focusout", release);
+    box.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") hovering = true; });
+    box.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") hovering = false; });
+    box.addEventListener("focusin", () => (focused = true));
+    box.addEventListener("focusout", () => (focused = false));
 
-    let touching = false, touchTimer = 0;
-    box.addEventListener("touchstart", () => {
+    // A gesture the browser takes over for scrolling ends in touchcancel, not
+    // touchend, so both have to let go.
+    let touchTimer = 0;
+    const touchOn = () => { clearTimeout(touchTimer); touching = true; };
+    const touchOff = () => {
       clearTimeout(touchTimer);
-      if (!touching) { touching = true; hold(); }
-    }, { passive: true });
-    box.addEventListener("touchend", () => {
-      touchTimer = window.setTimeout(() => { touching = false; release(); }, RESUME);
-    }, { passive: true });
+      touchTimer = window.setTimeout(() => (touching = false), RESUME);
+    };
+    box.addEventListener("touchstart", touchOn, { passive: true });
+    box.addEventListener("touchend", touchOff, { passive: true });
+    box.addEventListener("touchcancel", touchOff, { passive: true });
 
     // drag with the mouse only: on glass the browser's own swipe and momentum win
-    let dragging = false, startX = 0, startLeft = 0, moved = false;
+    let startX = 0, startLeft = 0, moved = false;
+    // what we left scrollLeft at, and until when someone else owns it
+    let expected = -1, foreignUntil = 0;
 
     box.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "mouse" || e.button !== 0) return;
       dragging = true; moved = false;
+      // the drag takes the offset over outright, whatever was moving it before
+      foreignUntil = 0;
       startX = e.clientX; startLeft = box.scrollLeft;
       box.setPointerCapture(e.pointerId);
       box.classList.add("dragging");
-      hold();
       e.preventDefault();          // no native link or image drag, no text selection
     });
     box.addEventListener("pointermove", (e) => {
       if (!dragging) return;
       const dx = e.clientX - startX;
       if (Math.abs(dx) > 3) moved = true;
-      box.scrollLeft = startLeft - dx;
+
+      // Wrap here rather than waiting for the next frame: a quick drag sends
+      // moves faster than frames arrive, and each one recomputing from an
+      // unwrapped startLeft would keep pinning the strip to the end it just hit.
+      let next = startLeft - dx;
+      const period = track!.scrollWidth / 2;
+      if (period > box.clientWidth) {
+        while (next < EDGE) { next += period; startLeft += period; }
+        while (next > period + EDGE) { next -= period; startLeft -= period; }
+      }
+      box.scrollLeft = next;
+      expected = box.scrollLeft;
     });
     const drop = () => {
       if (!dragging) return;
       dragging = false;
       box.classList.remove("dragging");
-      release();
     };
     box.addEventListener("pointerup", drop);
     box.addEventListener("pointercancel", drop);
@@ -174,20 +200,36 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
       const dt = Math.min(now - last, 100);   // coming back to the tab should not lurch
       last = now;
 
+      // If the strip is not where we left it, something else is driving: a
+      // fling still coasting, a wheel, the keyboard walking the links. Touch
+      // events cannot be relied on to say so — a fling outlives them — so this
+      // reads the scroll position itself and simply gets out of the way.
+      const actual = box!.scrollLeft;
+      if (expected >= 0 && Math.abs(actual - expected) > 1.5) foreignUntil = now + 700;
+      const steered = held() || now < foreignUntil;
+
       const period = track!.scrollWidth / 2;
       if (period > box!.clientWidth) {
-        if (!held) box!.scrollLeft += (period / PERIOD_SECONDS) * (dt / 1000);
+        if (!steered) box!.scrollLeft += (period / PERIOD_SECONDS) * (dt / 1000);
 
-        // The two copies are identical, so these seams are invisible. A drag in
-        // flight is measured from startLeft, so that moves with the wrap.
+        // The two copies are identical, so these seams are invisible — which is
+        // also why the wrap can wait. Writing scrollLeft mid-fling kills the
+        // fling, so while a finger is on the strip it is left alone and the
+        // wrap happens once the gesture is over, unseen.
         //
         // The band is [EDGE, period + EDGE]: a step of exactly one period from
         // either end lands inside it. Were the two ends a period apart instead,
         // each wrap would trip the other one and the strip would sit there
         // flipping between them every frame.
-        if (box!.scrollLeft > period + EDGE) { box!.scrollLeft -= period; startLeft -= period; }
-        else if (box!.scrollLeft < EDGE) { box!.scrollLeft += period; startLeft += period; }
+        // A mouse drag sets the offset itself, so it can be wrapped under —
+        // there is no fling to break. Only a scroll the browser owns is left
+        // alone, and it wraps as soon as that settles.
+        if (!touching && now >= foreignUntil) {
+          if (box!.scrollLeft > period + EDGE) { box!.scrollLeft -= period; startLeft -= period; }
+          else if (box!.scrollLeft < EDGE) { box!.scrollLeft += period; startLeft += period; }
+        }
       }
+      expected = box!.scrollLeft;
       raf = requestAnimationFrame(frame);
     }
 
