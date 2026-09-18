@@ -90,11 +90,10 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   /* an empty role still holds its line, so every mark sits on the same baseline */
   .role { font-size: 15px; line-height: 1.2; color: var(--ink-2); min-height: 1.2em; }
 
-  /* Where the strip does not drift — reduced motion, or a touch screen, where
-     the drift fought the finger — one copy is enough. It stays a strip either
-     way: still scrollable, just pushed by hand. Turning it into a wrapped
-     block instead left nothing to move at all, which reads as broken. */
-  @media (prefers-reduced-motion: reduce), (hover: none) {
+  /* Reduced motion stills the drift, and then one copy is enough. It stays a
+     strip either way: still scrollable, just pushed by hand. Turning it into a
+     wrapped block instead left nothing to move at all, which reads as broken. */
+  @media (prefers-reduced-motion: reduce) {
     .track li[aria-hidden="true"] { display: none; }
     .track { padding-right: 0; }
   }
@@ -115,15 +114,11 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   const box = document.querySelector<HTMLElement>(".marquee");
   const track = box?.querySelector<HTMLElement>(".track");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // On a touch screen the drift and the finger fight over the same scroll
-  // offset, and the finger loses: a swipe dies under the next frame's write.
-  // There the strip simply doesn't drift — it is swiped, which is what a
-  // horizontal list on a phone wants anyway.
-  const coarse = matchMedia("(hover: none)").matches;
 
-  if (box && track && !reduced && !coarse) {
+  if (box && track && !reduced) {
     const PERIOD_SECONDS = 24;   // time to cross one copy, as the CSS took
-    const RESUME = 1600;         // ms of stillness after a touch before drifting on
+    const RESUME = 900;          // ms after a finger lifts before drifting on
+    const SETTLE = 800;          // ms of quiet after a scroll we did not cause
     const EDGE = 1;              // px of slack that keeps the two wraps apart
 
     // Reasons to stay still, each its own flag rather than one counter: a
@@ -148,6 +143,15 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
     box.addEventListener("touchstart", touchOn, { passive: true });
     box.addEventListener("touchend", touchOff, { passive: true });
     box.addEventListener("touchcancel", touchOff, { passive: true });
+
+    // A fling on iOS keeps scrolling long after touchend, and no touch event
+    // says so. Every scroll the strip reports that we did not cause ourselves
+    // is that: hands off until it settles.
+    box.addEventListener("scroll", () => {
+      if (expected >= 0 && Math.abs(box.scrollLeft - expected) > 1.5) {
+        foreignUntil = performance.now() + SETTLE;
+      }
+    }, { passive: true });
 
     // drag with the mouse only: on glass the browser's own swipe and momentum win
     let startX = 0, startLeft = 0, moved = false;
@@ -205,7 +209,7 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
       // events cannot be relied on to say so — a fling outlives them — so this
       // reads the scroll position itself and simply gets out of the way.
       const actual = box!.scrollLeft;
-      if (expected >= 0 && Math.abs(actual - expected) > 1.5) foreignUntil = now + 700;
+      if (expected >= 0 && Math.abs(actual - expected) > 1.5) foreignUntil = now + SETTLE;
       const steered = held() || now < foreignUntil;
 
       const period = track!.scrollWidth / 2;
