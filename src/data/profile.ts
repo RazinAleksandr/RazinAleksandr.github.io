@@ -27,6 +27,7 @@ export const profile = {
   links: {
     github: "https://github.com/RazinAleksandr",
     linkedin: "https://www.linkedin.com/in/a-razin/",
+    x: "https://x.com/arazinml",
     // sorted newest first, not by citation count
     scholar: "https://scholar.google.com/citations?view_op=list_works&hl=en&user=-AsUnsgAAAAJ&sortby=pubdate",
     telegram: "https://t.me/xalexrazin",
