@@ -1,3 +1,3 @@
 import 'piccolore';
-import './c.B9JNIOlb.js';
+import './c.tFMvk9Lp.js';
 import 'clsx';

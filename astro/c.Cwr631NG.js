@@ -1,10 +1,13 @@
-import { e as createAstro, c as createComponent, m as maybeRenderHead, b as addAttribute, d as renderScript, a as renderTemplate, u as unescapeHTML, r as renderComponent, f as renderHead, g as renderSlot, h as defineScriptVars, F as Fragment } from './c.B9JNIOlb.js';
+import { e as createAstro, c as createComponent, m as maybeRenderHead, b as addAttribute, d as renderScript, a as renderTemplate, u as unescapeHTML, f as renderSlot, r as renderComponent, g as renderHead, h as defineScriptVars, F as Fragment } from './c.tFMvk9Lp.js';
 import 'piccolore';
 /* empty css           */
 import 'clsx';
+import { readFile } from 'node:fs/promises';
 
 const profile = {
   name: "Aleksandr Razin",
+  first: "Aleksandr",
+  last: "Razin",
   role: "Research Scientist",
   org: "INSAIT",
   orgHref: "https://insait.ai/",
@@ -61,10 +64,28 @@ const $$Icon = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate`${stroke[name] ? renderTemplate`${maybeRenderHead()}<svg${addAttribute(cls, "class")}${addAttribute(size, "width")}${addAttribute(size, "height")} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${unescapeHTML(stroke[name])}</svg>` : renderTemplate`<svg${addAttribute(cls, "class")}${addAttribute(size, "width")}${addAttribute(size, "height")} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path${addAttribute(fill[name], "d")}></path></svg>`}`;
 }, "/home/runner/work/RazinAleksandr.github.io/RazinAleksandr.github.io/src/components/Icon.astro", void 0);
 
+function isPageViews(value) {
+  if (!value || typeof value !== "object") return false;
+  const data = value;
+  return Number.isSafeInteger(data.total) && data.total >= 0 && typeof data.updatedAt === "string" && Number.isFinite(Date.parse(data.updatedAt)) && typeof data.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.startDate);
+}
+
+const $$PageViews = createComponent(async ($$result, $$props, $$slots) => {
+  let views;
+  try {
+    const data = JSON.parse(await readFile("public/views.json", "utf8"));
+    if (isPageViews(data)) views = data;
+  } catch {
+  }
+  const count = views?.total.toLocaleString("en-US");
+  const updated = views?.updatedAt.slice(0, 10);
+  return renderTemplate`${views && renderTemplate`${maybeRenderHead()}<span class="page-views"${addAttribute(`Site page views recorded by Google Analytics since ${views.startDate}; updated ${updated}`, "title")} data-astro-cid-p5os5452><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" data-astro-cid-p5os5452><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" data-astro-cid-p5os5452></path><circle cx="12" cy="12" r="3" data-astro-cid-p5os5452></circle></svg><span data-astro-cid-p5os5452>${count}<span class="sr-only" data-astro-cid-p5os5452> site page views, updated ${updated}</span></span></span>`}`;
+}, "/home/runner/work/RazinAleksandr.github.io/RazinAleksandr.github.io/src/components/PageViews.astro", void 0);
+
 var __freeze = Object.freeze;
 var __defProp = Object.defineProperty;
 var __template = (cooked, raw) => __freeze(__defProp(cooked, "raw", { value: __freeze(cooked.slice()) }));
-var _a;
+var _a, _b;
 const $$Astro = createAstro("https://razinaleksandr.github.io");
 const $$Base = createComponent(($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
@@ -79,6 +100,34 @@ const $$Base = createComponent(($$result, $$props, $$slots) => {
   const home = current === "home";
   const withSide = home || current === "cv";
   const portrait = href("portrait-900.jpg");
+  const productionSite = Astro2.site;
+  const route = Astro2.url.pathname;
+  const canonical = new URL(`${route.replace(/\/$/, "")}/`, productionSite).href;
+  const personId = new URL("/#person", productionSite).href;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": home ? "ProfilePage" : "WebPage",
+    "@id": `${canonical}#webpage`,
+    url: canonical,
+    name: title,
+    description,
+    ...home ? {
+      mainEntity: {
+        "@type": "Person",
+        "@id": personId,
+        name: profile.name,
+        givenName: profile.first,
+        familyName: profile.last,
+        url: productionSite.href,
+        image: new URL("/portrait.jpg", productionSite).href,
+        jobTitle: profile.role,
+        worksFor: { "@type": "Organization", name: profile.org, url: profile.orgHref },
+        sameAs: Object.values(profile.links)
+      }
+    } : { about: { "@id": personId } }
+  };
+  const googleVerification = process.env.GOOGLE_SITE_VERIFICATION;
+  const bingVerification = process.env.BING_SITE_VERIFICATION;
   const GA = "G-QX68KTT819";
   const nav = [
     ["home", "Profile", href("")],
@@ -88,7 +137,7 @@ const $$Base = createComponent(($$result, $$props, $$slots) => {
     ["projects", "Projects", home ? "#projects" : href("#projects")],
     ["cv", "CV", href("cv")]
   ];
-  return renderTemplate`<html lang="en" data-astro-cid-5hce7sga> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><meta name="description"${addAttribute(description, "content")}><meta name="theme-color" content="#120a1c"><link rel="icon" type="image/png" sizes="32x32"${addAttribute(href("icon-32.png"), "href")}><link rel="apple-touch-icon" sizes="180x180"${addAttribute(href("icon-180.png"), "href")}><link rel="sitemap"${addAttribute(href("sitemap-index.xml"), "href")}><meta property="og:type" content="profile"><meta property="og:title"${addAttribute(title, "content")}><meta property="og:description"${addAttribute(description, "content")}><meta property="og:image"${addAttribute(new URL(href("portrait.jpg"), Astro2.site), "content")}><meta name="twitter:card" content="summary"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap">${renderTemplate`${renderComponent($$result, "Fragment", Fragment, { "data-astro-cid-5hce7sga": true }, { "default": ($$result2) => renderTemplate(_a || (_a = __template(["<script async", "></script><script>(function(){", '\n          // define:vars wraps this in a function, so gtag is published on\n          // window by hand — the usual snippet leaves it global, and anything\n          // added later will expect to find it there.\n          window.dataLayer = window.dataLayer || [];\n          window.gtag = function gtag() { window.dataLayer.push(arguments); };\n          window.gtag("js", new Date());\n          window.gtag("config", GA);\n        })();</script>'])), addAttribute(`https://www.googletagmanager.com/gtag/js?id=${GA}`, "src"), defineScriptVars({ GA })) })}`}${renderHead()}</head> <body data-astro-cid-5hce7sga> <header class="top" data-astro-cid-5hce7sga> <nav class="wrap topnav label" aria-label="Site" data-astro-cid-5hce7sga> ${nav.map(([id, text, url]) => renderTemplate`<a${addAttribute(url, "href")}${addAttribute(current === id ? "page" : void 0, "aria-current")} data-astro-cid-5hce7sga>${text}</a>`)} </nav> </header> <div${addAttribute(["wrap", "layout", !withSide && "single"], "class:list")} data-astro-cid-5hce7sga> ${withSide && renderTemplate`<aside class="side" data-astro-cid-5hce7sga> <a class="photo"${addAttribute(href(""), "href")} aria-label="Home" data-astro-cid-5hce7sga> ${renderComponent($$result, "Portrait", $$Portrait, { "src": portrait, "alt": `Portrait of ${profile.name}`, "data-astro-cid-5hce7sga": true })} </a> <h1 class="name" data-astro-cid-5hce7sga>${profile.name}</h1> <p class="role" data-astro-cid-5hce7sga>${profile.role} · <a${addAttribute(profile.orgHref, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${profile.org}</a></p> <p class="where label" data-astro-cid-5hce7sga>${profile.location}, Bulgaria</p> <ul class="contacts" data-astro-cid-5hce7sga> <li data-astro-cid-5hce7sga><a${addAttribute(`mailto:${profile.email}`, "href")} data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "mail", "size": 15, "data-astro-cid-5hce7sga": true })} ${profile.email}</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.scholar, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "scholar", "size": 15, "data-astro-cid-5hce7sga": true })} Google Scholar</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.github, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "github", "size": 15, "data-astro-cid-5hce7sga": true })} GitHub</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.linkedin, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "linkedin", "size": 14, "data-astro-cid-5hce7sga": true })} LinkedIn</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.telegram, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "telegram", "size": 15, "data-astro-cid-5hce7sga": true })} Telegram</a></li> </ul> </aside>`} <main class="main" data-astro-cid-5hce7sga> ${renderSlot($$result, $$slots["default"])} <footer class="foot label" data-astro-cid-5hce7sga>© ${(/* @__PURE__ */ new Date()).getFullYear()} ${profile.name}</footer> </main> </div> </body></html>`;
+  return renderTemplate(_b || (_b = __template(['<html lang="en" data-astro-cid-5hce7sga> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>', '</title><meta name="description"', '><link rel="canonical"', ">", "", '<script type="application/ld+json">', '</script><meta name="theme-color" content="#120a1c"><link rel="icon" type="image/png" sizes="32x32"', '><link rel="apple-touch-icon" sizes="180x180"', '><link rel="sitemap"', '><meta property="og:type" content="profile"><meta property="og:title"', '><meta property="og:url"', '><meta property="og:description"', '><meta property="og:image"', '><meta name="twitter:card" content="summary"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap">', "", '</head> <body data-astro-cid-5hce7sga> <header class="top" data-astro-cid-5hce7sga> <nav class="wrap topnav label" aria-label="Site" data-astro-cid-5hce7sga> ', " </nav> </header> <div", " data-astro-cid-5hce7sga> ", ' <main class="main" data-astro-cid-5hce7sga> ', ' <footer class="foot label" data-astro-cid-5hce7sga>© ', " ", "</footer> </main> </div> </body></html>"])), title, addAttribute(description, "content"), addAttribute(canonical, "href"), googleVerification && renderTemplate`<meta name="google-site-verification"${addAttribute(googleVerification, "content")}>`, bingVerification && renderTemplate`<meta name="msvalidate.01"${addAttribute(bingVerification, "content")}>`, unescapeHTML(JSON.stringify(structuredData).replace(/</g, "\\u003c")), addAttribute(href("icon-32.png"), "href"), addAttribute(href("icon-180.png"), "href"), addAttribute(href("sitemap-index.xml"), "href"), addAttribute(title, "content"), addAttribute(canonical, "content"), addAttribute(description, "content"), addAttribute(new URL(href("portrait.jpg"), Astro2.site), "content"), renderTemplate`${renderComponent($$result, "Fragment", Fragment, { "data-astro-cid-5hce7sga": true }, { "default": ($$result2) => renderTemplate(_a || (_a = __template(["<script async", "></script><script>(function(){", '\n          // define:vars wraps this in a function, so gtag is published on\n          // window by hand — the usual snippet leaves it global, and anything\n          // added later will expect to find it there.\n          window.dataLayer = window.dataLayer || [];\n          window.gtag = function gtag() { window.dataLayer.push(arguments); };\n          window.gtag("js", new Date());\n          window.gtag("config", GA);\n        })();</script>'])), addAttribute(`https://www.googletagmanager.com/gtag/js?id=${GA}`, "src"), defineScriptVars({ GA })) })}`, renderHead(), nav.map(([id, text, url]) => renderTemplate`<a${addAttribute(url, "href")}${addAttribute(current === id ? "page" : void 0, "aria-current")} data-astro-cid-5hce7sga>${text}</a>`), addAttribute(["wrap", "layout", !withSide && "single"], "class:list"), withSide && renderTemplate`<aside class="side" data-astro-cid-5hce7sga> <div class="photo" data-astro-cid-5hce7sga> <a${addAttribute(href(""), "href")} aria-label="Home" data-astro-cid-5hce7sga> ${renderComponent($$result, "Portrait", $$Portrait, { "src": portrait, "alt": `Portrait of ${profile.name}`, "data-astro-cid-5hce7sga": true })} </a> ${renderComponent($$result, "PageViews", $$PageViews, { "data-astro-cid-5hce7sga": true })} </div> <h1 class="name" data-astro-cid-5hce7sga>${profile.name}</h1> <p class="role" data-astro-cid-5hce7sga>${profile.role} · <a${addAttribute(profile.orgHref, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${profile.org}</a></p> <p class="where label" data-astro-cid-5hce7sga>${profile.location}, Bulgaria</p> <ul class="contacts" data-astro-cid-5hce7sga> <li data-astro-cid-5hce7sga><a${addAttribute(`mailto:${profile.email}`, "href")} data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "mail", "size": 15, "data-astro-cid-5hce7sga": true })} ${profile.email}</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.scholar, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "scholar", "size": 15, "data-astro-cid-5hce7sga": true })} Google Scholar</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.github, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "github", "size": 15, "data-astro-cid-5hce7sga": true })} GitHub</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.linkedin, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "linkedin", "size": 14, "data-astro-cid-5hce7sga": true })} LinkedIn</a></li> <li data-astro-cid-5hce7sga><a${addAttribute(profile.links.telegram, "href")} target="_blank" rel="noopener" data-astro-cid-5hce7sga>${renderComponent($$result, "Icon", $$Icon, { "name": "telegram", "size": 15, "data-astro-cid-5hce7sga": true })} Telegram</a></li> </ul> </aside>`, renderSlot($$result, $$slots["default"]), (/* @__PURE__ */ new Date()).getFullYear(), profile.name);
 }, "/home/runner/work/RazinAleksandr.github.io/RazinAleksandr.github.io/src/layouts/Base.astro", void 0);
 
 export { $$Base as $, $$Icon as a, profile as p };

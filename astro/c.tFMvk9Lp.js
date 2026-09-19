@@ -2238,4 +2238,4 @@ function spreadAttributes(values = {}, _name, { class: scopedClassName } = {}) {
   return markHTMLString(output);
 }
 
-export { AstroJSX as A, Fragment as F, NOOP_MIDDLEWARE_HEADER as N, renderTemplate as a, addAttribute as b, createComponent as c, renderScript as d, createAstro as e, renderHead as f, renderSlot as g, defineScriptVars as h, renderJSX as i, createVNode as j, AstroUserError as k, decodeKey as l, maybeRenderHead as m, renderComponent as r, unescapeHTML as u };
+export { AstroJSX as A, Fragment as F, NOOP_MIDDLEWARE_HEADER as N, renderTemplate as a, addAttribute as b, createComponent as c, renderScript as d, createAstro as e, renderSlot as f, renderHead as g, defineScriptVars as h, renderJSX as i, createVNode as j, AstroUserError as k, decodeKey as l, maybeRenderHead as m, renderComponent as r, unescapeHTML as u };
