@@ -2,10 +2,11 @@ name: Deploy site
 
 on:
   push:
-    branches: [main, astro-site, "claude/**"]
+    branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * *"
 
-# the publish action commits the built site to the gh-pages branch
 permissions:
   contents: write
 
@@ -15,6 +16,7 @@ concurrency:
 
 jobs:
   build-deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,32 +28,24 @@ jobs:
 
       - run: npm ci
 
-      # On a working branch this publishes to gh-pages/next, so it is live at
-      # /next/ while the old site keeps the root. On main it takes the root.
-      # Promoting the branch therefore needs no edit here.
-      - name: Work out where this deploys
-        id: t
-        run: |
-          if [[ "$GITHUB_REF_NAME" == "main" ]]; then
-            echo "base=/"      >> "$GITHUB_OUTPUT"
-            echo "folder="     >> "$GITHUB_OUTPUT"
-          else
-            echo "base=/next/" >> "$GITHUB_OUTPUT"
-            echo "folder=next" >> "$GITHUB_OUTPUT"
-          fi
-          echo "Branch $GITHUB_REF_NAME -> base $(grep base "$GITHUB_OUTPUT")"
+      - name: Update page views
+        run: node scripts/update-pageviews.mjs
+        env:
+          GA_PROPERTY_ID: ${{ vars.GA_PROPERTY_ID }}
+          GA_START_DATE: ${{ vars.GA_START_DATE }}
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
 
       - name: Build
         run: npm run build
         env:
-          BASE_PATH: ${{ steps.t.outputs.base }}
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
+          BING_SITE_VERIFICATION: ${{ vars.BING_SITE_VERIFICATION }}
 
-      # Same action the Jekyll site already uses, so Pages stays in branch mode
-      # and the existing deployment is untouched.
+      # Publish only the root site. Cleaning removes the retired /next/ copy.
       - name: Publish
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: dist
-          target-folder: ${{ steps.t.outputs.folder }}
+          clean: true
           commit-message: "Deploy Astro site from @ ${{ github.sha }}"

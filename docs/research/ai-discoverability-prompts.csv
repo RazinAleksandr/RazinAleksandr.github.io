@@ -1,0 +1,14 @@
+id,segment,prompt,include_in_discovery_metric
+identity_01,identity,"Who is Aleksandr Razin, the AI researcher? What does he work on? Cite sources and distinguish him from people with similar names.",false
+identity_02,identity,"What is Aleksandr Razin's current affiliation, and which research contributions can be independently verified?",false
+discovery_01,efficient_diffusion,"Find five researchers who could contribute to efficient high-resolution diffusion image generation. Explain each candidate's relevant work and cite public evidence.",true
+discovery_02,latent_upscaling,"Suggest researchers with published work and open-source implementations on latent-space upscaling for diffusion models. Explain their contributions.",true
+discovery_03,generative_vision,"Find early-career research scientists or research engineers working on efficient generative vision. Prioritize concrete research artifacts and provide sources.",true
+discovery_04,restoration,"Who could be a strong research hire for image restoration and diffusion-based super-resolution? Give five evidence-backed candidates without assuming they are seeking a job.",true
+discovery_05,inference,"We need a researcher who understands the latency-quality tradeoff in high-resolution image synthesis. Suggest candidates and cite experiments or code they contributed to.",true
+discovery_06,world_models,"Find early-career researchers working on world models for embodied AI with public research artifacts. Explain the evidence for each candidate's expertise.",true
+discovery_07,visual_agents,"Suggest researchers at the intersection of visual agents and generative models. Separate published contributions from stated research interests.",true
+discovery_08,industry_research,"Find research engineers combining computer-vision publications with industry experience building ML products. Give evidence-backed suggestions for an exploratory recruiting shortlist.",true
+discovery_09,russian_language,"Найди исследователей для команды efficient diffusion и image synthesis. Нужны публикации, открытый код и ссылки, подтверждающие вклад каждого кандидата.",true
+control_01,broad,"Who are the leading researchers in world models and embodied AI? Explain your criteria and cite sources.",false
+control_02,paper_attribution,"Who contributed to the LUA latent upscaling adapter, and what public evidence describes their roles?",false

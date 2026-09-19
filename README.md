@@ -88,11 +88,13 @@ shows a short note rather than a blank page.
 
 ## Deploying
 
-`.github/workflows/deploy-astro.yml` builds on every push. From `main` it
-publishes to the root of `gh-pages`; from any other branch it publishes to
-`gh-pages/next`, live at `/next/`, so a redesign can be checked in place
-before it replaces the main page. Locally, `BASE_PATH=/next/ npm run build`
-reproduces the subpath build.
+`.github/workflows/deploy-astro.yml` publishes `main` to the root of
+`gh-pages` on push, manual dispatch, and daily at 05:23 UTC to refresh page views.
+Other branches do not deploy. The retired `/next/` copy is removed by the next
+production deployment; it is no longer built.
+
+See [search and page-view setup](docs/site-services.md) for Google/Bing ownership
+verification and the optional Google Analytics counter.
 
 ## Sources
 
