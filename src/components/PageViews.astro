@@ -1,0 +1,42 @@
+---
+import { readFile } from "node:fs/promises";
+import { isPageViews, type PageViews } from "../lib/pageviews";
+
+let views: PageViews | undefined;
+try {
+  const data: unknown = JSON.parse(await readFile("public/views.json", "utf8"));
+  if (isPageViews(data)) views = data;
+} catch {
+  // No configured data source yet: do not show a fabricated count.
+}
+const count = views?.total.toLocaleString("en-US");
+const updated = views?.updatedAt.slice(0, 10);
+---
+
+{views && (
+  <span class="page-views" title={`Site page views recorded by Google Analytics since ${views.startDate}; updated ${updated}`}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+    <span>{count}<span class="sr-only"> site page views, updated {updated}</span></span>
+  </span>
+)}
+
+<style>
+  .page-views {
+    position: absolute; bottom: 10px; right: 10px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px; border-radius: 6px;
+    color: #fff; background: rgba(18, 10, 28, .8);
+    font-family: var(--mono); font-size: 11px; line-height: 1.4;
+    font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  @media (max-width: 880px) {
+    .page-views { bottom: 4px; right: 4px; font-size: 9px; padding: 3px 5px; gap: 4px; }
+  }
+</style>

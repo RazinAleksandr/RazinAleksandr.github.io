@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { profile } from "../data/profile";
 import Portrait from "../components/Portrait.astro";
 import Icon from "../components/Icon.astro";
+import PageViews from "../components/PageViews.astro";
 
 interface Props { title?: string; description?: string; current?: string }
 const {
@@ -18,6 +19,34 @@ const home = current === "home";
 // this page rather than a place you navigate away to
 const withSide = home || current === "cv";
 const portrait = href("portrait-900.jpg");
+const productionSite = Astro.site!;
+const route = Astro.url.pathname;
+const canonical = new URL(`${route.replace(/\/$/, "")}/`, productionSite).href;
+const personId = new URL("/#person", productionSite).href;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": home ? "ProfilePage" : "WebPage",
+  "@id": `${canonical}#webpage`,
+  url: canonical,
+  name: title,
+  description,
+  ...(home ? {
+    mainEntity: {
+      "@type": "Person",
+      "@id": personId,
+      name: profile.name,
+      givenName: profile.first,
+      familyName: profile.last,
+      url: productionSite.href,
+      image: new URL("/portrait.jpg", productionSite).href,
+      jobTitle: profile.role,
+      worksFor: { "@type": "Organization", name: profile.org, url: profile.orgHref },
+      sameAs: Object.values(profile.links),
+    },
+  } : { about: { "@id": personId } }),
+};
+const googleVerification = import.meta.env.GOOGLE_SITE_VERIFICATION;
+const bingVerification = import.meta.env.BING_SITE_VERIFICATION;
 
 // The GA4 property the Jekyll site reported to, so the history continues in
 // the same place. Loaded in production only: a dev server left open all day
@@ -43,12 +72,17 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+    {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, "\\u003c")} />
     <meta name="theme-color" content="#120a1c" />
     <link rel="icon" type="image/png" sizes="32x32" href={href("icon-32.png")} />
     <link rel="apple-touch-icon" sizes="180x180" href={href("icon-180.png")} />
     <link rel="sitemap" href={href("sitemap-index.xml")} />
     <meta property="og:type" content="profile" />
     <meta property="og:title" content={title} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(href("portrait.jpg"), Astro.site)} />
     <meta name="twitter:card" content="summary" />
@@ -84,9 +118,12 @@ const nav = [
 
     <div class:list={["wrap", "layout", !withSide && "single"]}>
       {withSide && <aside class="side">
-        <a class="photo" href={href("")} aria-label="Home">
-          <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
-        </a>
+        <div class="photo">
+          <a href={href("")} aria-label="Home">
+            <Portrait src={portrait} alt={`Portrait of ${profile.name}`} />
+          </a>
+          <PageViews />
+        </div>
         <h1 class="name">{profile.name}</h1>
         <p class="role">{profile.role} · <a href={profile.orgHref} target="_blank" rel="noopener">{profile.org}</a></p>
         <p class="where label">{profile.location}, Bulgaria</p>
@@ -136,7 +173,8 @@ const nav = [
     position: sticky; top: 76px; align-self: start;
     display: grid; gap: 6px; justify-items: start;
   }
-  .photo { display: block; width: 100%; margin-bottom: 14px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .photo { position: relative; display: block; width: 100%; margin-bottom: 14px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .photo > a { display: block; }
   .name { font-size: 34px; font-weight: 500; }
   .role { font-size: 17px; color: var(--ink-2); }
   .role a { color: var(--ink); }
