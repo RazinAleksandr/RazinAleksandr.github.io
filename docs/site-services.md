@@ -66,6 +66,20 @@ is generated and ignored by Git.
 Local authenticated refresh: `node scripts/update-pageviews.mjs`, with the same
 environment variables, then `npm run build`. Keep credentials outside the repo.
 
+For a local JSON key file, put it in the ignored `.secrets/ga-service-account.json`
+and create the ignored `.env.local` at the repository root:
+
+```dotenv
+GA_PROPERTY_ID=YOUR_NUMERIC_PROPERTY_ID
+GOOGLE_APPLICATION_CREDENTIALS=.secrets/ga-service-account.json
+GA_START_DATE=2020-01-01
+```
+
+Run `npm run views:update` and then `npm run build`. The local refresh uses strict
+mode: missing configuration or an unsuccessful GA request produces a nonzero exit
+status, so a retained snapshot is not mistaken for a successful live connection.
+The GitHub deployment continues to use the JSON secret and tolerate API outages.
+
 Official references:
 
 - [Analytics API setup](https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart)

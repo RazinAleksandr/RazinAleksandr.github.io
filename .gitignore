@@ -6,3 +6,4 @@ node_modules/
 public/views.json
 .env
 .env.*
+.secrets/

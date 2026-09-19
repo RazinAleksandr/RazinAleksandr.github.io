@@ -5,6 +5,8 @@ const output = new URL("../public/views.json", import.meta.url);
 const site = "https://razinaleksandr.github.io";
 const property = process.env.GA_PROPERTY_ID;
 const credentials = process.env.GA_SERVICE_ACCOUNT_JSON;
+const keyFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const strict = process.argv.includes("--strict");
 const startDate = process.env.GA_START_DATE || "2020-01-01";
 
 // Keep the last published snapshot when GA is temporarily unavailable.
@@ -22,16 +24,16 @@ try {
   console.warn("[views] Previous snapshot unavailable.");
 }
 
-if (!property || !credentials) {
+if (!property || (!credentials && !keyFile)) {
   console.log("[views] GA not configured; retaining any previous snapshot. Otherwise the counter is hidden.");
-  process.exit(0);
+  process.exit(strict ? 1 : 0);
 }
 
 try {
   if (!/^\d+$/.test(property)) throw new Error("Invalid property ID");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) throw new Error("Invalid start date");
   const auth = new GoogleAuth({
-    credentials: JSON.parse(credentials),
+    ...(credentials ? { credentials: JSON.parse(credentials) } : { keyFilename: keyFile }),
     scopes: ["https://www.googleapis.com/auth/analytics.readonly"],
   });
   const client = await auth.getClient();
@@ -60,4 +62,5 @@ try {
 } catch {
   // Auth errors may carry credential-bearing request details: never log them.
   console.warn("[views] GA report unavailable. Check property ID, service-account access and Data API configuration; retaining any previous snapshot.");
+  if (strict) process.exitCode = 1;
 }
