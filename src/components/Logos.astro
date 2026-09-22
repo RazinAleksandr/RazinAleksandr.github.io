@@ -178,7 +178,6 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
       startX = e.clientX; startLeft = box.scrollLeft;
       box.setPointerCapture(e.pointerId);
       box.classList.add("dragging");
-      e.preventDefault();          // no native link or image drag, no text selection
     });
     box.addEventListener("pointermove", (e) => {
       if (!dragging) return;
