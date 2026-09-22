@@ -1,11 +1,37 @@
 /* ============================================================
    Aleksandr Razin — personal site.
-   A dark plum room: the background is one slow gradient, the
-   type is cream and set in a text serif, links are lavender and
-   warm to rose under the pointer. One theme.
+   A warm paper room by default, with a dark plum alternative.
    ============================================================ */
 
 :root {
+  --bg-0:    #fbfaf8;
+  --bg-1:    #f7f3fa;
+  --bg-2:    #eee8f7;
+  --card:    rgba(255, 255, 255, .84);
+  --card-2:  rgba(255, 255, 255, 1);
+  --line:    rgba(38, 28, 49, .13);
+  --line-2:  rgba(38, 28, 49, .25);
+  --ink:     #241c2c;
+  --ink-2:   #50475a;
+  --muted:   #7d7484;
+  --accent:  #6748c7;
+  --rose:    #bd4772;
+  --badge:   #6948c9;
+  --notice:  #f2edff;
+  --notice-line: #d7c9fa;
+  --top-bg:   rgba(251, 250, 248, .82);
+  --shadow:  0 10px 30px rgba(54, 37, 76, .12);
+
+  --serif: "Newsreader", Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --side: 300px;
+  --w: 1180px;
+  --gutter: 28px;
+  --radius: 12px;
+}
+
+:root[data-theme="dark"] {
   --bg-0:    #120a1c;
   --bg-1:    #1c1029;
   --bg-2:    #2b1a3d;
@@ -19,15 +45,10 @@
   --accent:  #c8b5ff;
   --rose:    #ff96b8;
   --badge:   #7b5cff;
+  --notice:  rgba(255, 255, 255, .055);
+  --notice-line: rgba(200, 181, 255, .32);
+  --top-bg:   rgba(18, 10, 28, .55);
   --shadow:  0 10px 30px rgba(0, 0, 0, .35);
-
-  --serif: "Newsreader", Georgia, "Iowan Old Style", "Times New Roman", serif;
-  --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  --side: 300px;
-  --w: 1180px;
-  --gutter: 28px;
-  --radius: 12px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

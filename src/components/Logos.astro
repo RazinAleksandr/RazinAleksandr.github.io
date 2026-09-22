@@ -75,6 +75,18 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   .stop:hover .mark, .stop:focus-visible .mark { opacity: 1; }
   /* a mark in its own colours is never held back — that is the point of it */
   .mark.brand { opacity: 1; }
+  /* On paper, monochrome marks use a dark graphite ink. */
+  :global(:root:not([data-theme="dark"])) .mark img:not(.brand) { filter: brightness(0) opacity(.62); }
+  :global(:root:not([data-theme="dark"])) .mark img.brand { filter: brightness(0) opacity(.62); }
+  /* The supplied INSAIT wordmark already has red AI. Restore just that slice
+     over the graphite base so the original brand colours survive on paper. */
+  :global(:root:not([data-theme="dark"])) .mark.brand { position: relative; }
+  :global(:root:not([data-theme="dark"])) .mark.brand::after {
+    content: ""; position: absolute; inset: 0;
+    background: url("/logos/insait.png") center / contain no-repeat;
+    clip-path: inset(0 18% 0 50%);
+    pointer-events: none;
+  }
   /* nothing to hover with on a touch screen — there the marks stay lit */
   @media (hover: none) { .mark { opacity: 1; } }
   .mark img { height: 26px; width: auto; }
@@ -116,7 +128,7 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (box && track && !reduced) {
-    const PERIOD_SECONDS = 24;   // time to cross one copy, as the CSS took
+    const PERIOD_SECONDS = 14;   // time to cross one copy, as the CSS took
     const RESUME = 900;          // ms after a finger lifts before drifting on
     const SETTLE = 800;          // ms of quiet after a scroll we did not cause
     const EDGE = 1;              // px of slack that keeps the two wraps apart
