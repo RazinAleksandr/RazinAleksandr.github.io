@@ -30,8 +30,8 @@ export type Org = {
 };
 
 export const orgs: Org[] = [
-  { name: "Mining University", role: "Software Engineer", from: "2021.01", to: "2021.12", href: "https://spmi.ru/", emblem: "logos/mining.png" },
-  { name: "ITMO University", role: "Deep Learning Engineer", from: "2022.06", to: "2023.05", href: "https://en.itmo.ru/", img: "logos/itmo.svg", ratio: 317 / 39 },
+  { name: "Mining University", role: "Software Engineer", from: "2021.01", to: "2021.12", href: "https://www.topuniversities.com/universities/saint-petersburg-mining-university", emblem: "logos/mining.png" },
+  { name: "ITMO University", role: "Deep Learning Engineer", from: "2022.06", to: "2023.05", href: "https://www.topuniversities.com/universities/itmo-university", img: "logos/itmo.svg", ratio: 317 / 39 },
   { name: "Huawei", role: "AI Researcher", from: "2023.05", to: "2025.04", href: "https://www.huawei.com/", icon: "huawei" },
   { name: "Own startup", role: "Founder", from: "2025.04", to: "2025.09" },
   { name: "TradingView", role: "Senior ML Engineer", from: "2025.09", to: "2026.09", href: "https://www.tradingview.com/", icon: "tradingview" },

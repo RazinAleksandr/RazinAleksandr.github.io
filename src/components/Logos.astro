@@ -176,7 +176,6 @@ const span = (o: (typeof orgs)[number]) => `${md(o.from)} — ${md(o.to)}`;
       // the drag takes the offset over outright, whatever was moving it before
       foreignUntil = 0;
       startX = e.clientX; startLeft = box.scrollLeft;
-      box.setPointerCapture(e.pointerId);
       box.classList.add("dragging");
     });
     box.addEventListener("pointermove", (e) => {
