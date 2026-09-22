@@ -6,7 +6,7 @@ export const awards: Award[] = [
     year: "2026",
     title: "ELLIS PhD programme",
     detail: "Selected, top 15% of 6,000+ applicants.",
-    href: "https://ellis.eu/research/phd-postdoc",
+    href: "https://ellis.eu/student/2026-aleksandr-razin",
   },
   {
     year: "2023",
