@@ -33,5 +33,5 @@ export const profile = {
     telegram: "https://t.me/xalexrazin",
   },
 
-  cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "July 2026" },
+  cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "October 2026" },
 } as const;
