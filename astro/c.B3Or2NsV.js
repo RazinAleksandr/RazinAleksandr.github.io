@@ -30,7 +30,7 @@ const profile = {
     scholar: "https://scholar.google.com/citations?view_op=list_works&hl=en&user=-AsUnsgAAAAJ&sortby=pubdate",
     telegram: "https://t.me/xalexrazin"
   },
-  cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "July 2026" }
+  cv: { file: "cv/Aleksandr_Razin_CV.pdf", updated: "October 2026" }
 };
 
 const $$Astro$2 = createAstro("https://razinaleksandr.github.io");
